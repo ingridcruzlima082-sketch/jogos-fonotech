@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Espelho Mágico - FonoTech</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        h1 { color: #1e293b; margin-bottom: 5px; font-size: 24px; }
+        p.sub { color: #64748b; margin-bottom: 25px; font-size: 14px; }
+        .form-identificacao { margin: 20px 0; padding: 20px; background: #f1f5f9; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .form-identificacao input { padding: 10px; font-size: 15px; width: 80%; max-width: 350px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 8px; outline: none; }
+        .btn-iniciar { background-color: #1d4ed8; color: white; border: none; padding: 10px 25px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; display: block; margin-left: auto; margin-right: auto; }
+        .jogo-area { display: none; }
+        video { width: 100%; max-width: 500px; border-radius: 10px; border: 2px solid #3b82f6; background: #000; margin-top: 15px; }
+        .voltar-link { display: inline-block; margin-top: 30px; text-decoration: none; color: #64748b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🪞 Espelho Mágico</h1>
+        <p class="sub">Autocorreção visual e controle articulatório</p>
+        <div id="telaIdentificacao" class="form-identificacao">
+            <label style="font-weight: bold; display: block;">Nome do Paciente:</label>
+            <input type="text" id="nomePaciente" placeholder="Nome completo...">
+            <button type="button" class="btn-iniciar" onclick="iniciar()">Iniciar 🚀</button>
+        </div>
+        <div id="telaJogo" class="jogo-area">
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 10px;">Paciente: <strong id="exibirNome"></strong></div>
+            <p>Observe os movimentos da sua boca no espelho virtual e compare com o modelo:</p>
+            <div style="font-size: 32px; margin: 10px 0;">🎯 Alvo: Protrusão Labial / Bico</div>
+            <video id="webcam" autoplay playsinline></video>
+        </div>
+        <a href="index.html" class="voltar-link">⬅️ Voltar para a Pasta de Jogos</a>
+    </div>
+    <script>
+        function iniciar() {
+            let nome = document.getElementById('nomePaciente').value;
+            if(!nome) return alert('Digite o nome');
+            document.getElementById('exibirNome').innerText = nome;
+            document.getElementById('telaIdentificacao').style.display = 'none';
+            document.getElementById('telaJogo').style.display = 'block';
+            
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => { document.getElementById('webcam').srcObject = stream; })
+                .catch(err => { alert("Não foi possível acessar a câmara."); });
+        }
+    </script>
+</body>
+</html>

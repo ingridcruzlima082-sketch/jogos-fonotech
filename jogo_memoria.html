@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Jogo da Memória dos Fonemas - FonoTech</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #1e293b;
+            margin-bottom: 5px;
+            font-size: 24px;
+        }
+        p.sub {
+            color: #64748b;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        .painel-controle {
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        select, button {
+            padding: 8px 15px;
+            font-size: 14px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button {
+            background-color: #1d4ed8;
+            color: white;
+            border: none;
+        }
+        button:hover {
+            background-color: #1e40af;
+        }
+        .placar {
+            font-weight: bold;
+            color: #334155;
+            font-size: 15px;
+        }
+        .grid-memoria {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+        @media (max-width: 600px) {
+            .grid-memoria { grid-template-columns: repeat(3, 1fr); }
+        }
+        .carta {
+            aspect-ratio: 1;
+            background-color: #3b82f6;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, background-color 0.3s;
+            user-select: none;
+        }
+        .carta span.emoji {
+            font-size: 40px;
+        }
+        .carta span.texto-palavra {
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 4px;
+            display: none;
+        }
+        .carta.virada {
+            background-color: #ffffff;
+            color: #1e293b;
+            border: 2px solid #3b82f6;
+        }
+        .carta.virada span.texto-palavra {
+            display: block;
+        }
+        .carta.encontrada {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 2px solid #22c55e;
+            cursor: default;
+        }
+        .carta.encontrada span.texto-palavra {
+            display: block;
+        }
+        .voltar-link {
+            display: inline-block;
+            margin-top: 25px;
+            text-decoration: none;
+            color: #64748b;
+            font-weight: bold;
+        }
+        .voltar-link:hover {
+            color: #1e293b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Jogo da Memória dos Fonemas</h1>
+        <p class="sub">Estimulação visual e fonológica com figuras e palavras</p>
+
+        <div class="painel-controle">
+            <label for="seletorFonema"><strong>Selecionar Fonema / Alvo:</strong></label>
+            <select id="seletorFonema" onchange="mudarFonema()">
+                <optgroup label="Fonemas Isolados">
+                    <option value="som_p">Fonema /P/ (Pato, Pote, Pia, Pipa)</option>
+                    <option value="som_b">Fonema /B/ (Bato, Bote, Bia, Bola)</option>
+                    <option value="som_t">Fonema /T/ (Tia, Tato, Toca, Tapa)</option>
+                    <option value="som_d">Fonema /D/ (Dia, Dato, Doca, Dedo)</option>
+                    <option value="som_f">Fonema /F/ (Faca, Fio, Foca, Fogo)</option>
+                    <option value="som_v">Fonema /V/ (Vaca, Vio, Voca, Vela)</option>
+                    <option value="som_s">Fonema /S/ (Sapo, Selo, Sola, Sopa)</option>
+                    <option value="som_z">Fonema /Z/ (Zelo, Zona, Zebu, Zero)</option>
+                    <option value="som_k">Fonema /K/ (Cama, Cabo, Gato*, Copo)</option>
+                    <option value="som_g">Fonema /G/ (Gama, Gabo, Gato, Gola)</option>
+                </optgroup>
+                <optgroup label="Oposições Fonológicas (Pares Mínimos)">
+                    <option value="p_b">Oclusivas: /P/ vs /B/ (Pato / Bato)</option>
+                    <option value="t_d">Oclusivas: /T/ vs /D/ (Tia / Dia)</option>
+                    <option value="f_v">Fricativas: /F/ vs /V/ (Faca / Vaca)</option>
+                    <option value="s_z">Fricativas: /S/ vs /Z/ (Sapo / Zelo)</option>
+                </optgroup>
+            </select>
+            <button onclick="reiniciarJogo()">🔄 Reiniciar</button>
+            <div class="placar">Pares: <span id="contadorPares">0</span> / 6</div>
+        </div>
+
+        <div class="grid-memoria" id="gridMemoria"></div>
+
+        <div>
+            <a href="index.html" class="voltar-link">⬅️ Voltar para a Pasta de Jogos</a>
+        </div>
+    </div>
+
+    <script>
+        // Banco de itens contendo { nome, emoji }
+        const itensBanco = {
+            som_p: [
+                {n: "Pato", e: "🦆"}, {n: "Pote", e: "🏺"}, {n: "Pia", e: "🚰"}, {n: "Pipa", e: "🪁"},
+                {n: "Pato", e: "🦆"}, {n: "Pote", e: "🏺"}, {n: "Pia", e: "🚰"}, {n: "Pipa", e: "🪁"},
+                {n: Perna = "Perna", e: "🦵"}, {n: Perna = "Perna", e: "🦵"}, {n: "Pêra", e: "🍐"}, {n: "Pêra", e: "🍐"}
+            ],
+            som_b: [
+                {n: "Bola", e: "⚽"}, {n: "Bala", e: "🍬"}, {n: "Bebê", e: "👶"}, {n: "Bota", e: "👢"},
+                {n: "Bola", e: "⚽"}, {n: "Bala", e: "🍬"}, {n: "Bebê", e: "👶"}, {n: "Bota", e: "👢"},
+                {n: "Banana", e: "🍌"}, {n: "Banana", e: "🍌"}, {n: "Baú", e: "📦"}, {n: "Baú", e: "📦"}
+            ],
+            som_t: [
+                {n: "Tia", e: "👩‍🏫"}, {n: "Teia", e: "🕸️"}, {n: "Toca", e: "🕳️"}, {n: "Tapa", e: "👋"},
+                {n: "Tia", e: "👩‍🏫"}, {n: "Teia", e: "🕸️"}, {n: "Toca", e: "🕳️"}, {n: "Tapa", e: "👋"},
+                {n: "Tatu", e: "🐾"}, {n: "Tatu", e: "🐾"}, {n: "Teto", e: "🏠"}, {n: "Teto", e: "🏠"}
+            ],
+            som_d: [
+                {n: "Dia", e: "☀️"}, {n: "Dedo", e: "👍"}, {n: "Dado", e: "🎲"}, {n: "Doce", e: "🧁"},
+                {n: "Dia", e: "☀️"}, {n: "Dedo", e: "👍"}, {n: "Dado", e: "🎲"}, {n: "Doce", e: "🧁"},
+                {n: "Dente", e: "🦷"}, {n: "Dente", e: "🦷"}, {n: "Dominó", e: "🁫"}, {n: "Dominó", e: "🁫"}
+            ],
+            som_f: [
+                {n: "Faca", e: "🔪"}, {n: "Fio", e: "🧵"}, {n: "Foca", e: "🦭"}, {n: "Fogo", e: "🔥"},
+                {n: "Faca", e: "🔪"}, {n: "Fio", e: "🧵"}, {n: "Foca", e: "🦭"}, {n: "Fogo", e: "🔥"},
+                {n: "Fada", e: "🧚‍♀️"}, {n: "Fada", e: "🧚‍♀️"}, {n: "Folha", e: "🍃"}, {n: "Folha", e: "🍃"}
+            ],
+            som_v: [
+                {n: "Vaca", e: "🐮"}, {n: "Vela", e: "🕯️"}, {n: "Vaso", e: "🏺"}, {n: "Uva", e: "🍇"},
+                {n: "Vaca", e: "🐮"}, {n: "Vela", e: "🕯️"}, {n: "Vaso", e: "🏺"}, {n: "Uva", e: "🍇"},
+                {n: "Vidro", e: "🪟"}, {n: "Vidro", e: "🪟"}, {n: "Vila", e: "🏘️"}, {n: "Vila", e: "🏘️"}
+            ],
+            som_s: [
+                {n: "Sapo", e: "🐸"}, {n: "Selo", e: "✉️"}, {n: "Sola", e: "👞"}, {n: "Sopa", e: "🍲"},
+                {n: "Sapo", e: "🐸"}, {n: "Selo", e: "✉️"}, {n: "Sola", e: "👞"}, {n: "Sopa", e: "🍲"},
+                {n: "Saco", e: "🛍️"}, {n: "Saco", e: "🛍️"}, {n: "Sofá", e: "🛋️"}, {n: "Sofá", e: "🛋️"}
+            ],
+            som_z: [
+                {n: "Zebra", e: "🦓"}, {n: "Zero", e: "0️⃣"}, {n: "Zangão", e: "🐝"}, {n: "Zíper", e: "🤐"},
+                {n: "Zebra", e: "🦓"}, {n: "Zero", e: "0️⃣"}, {n: "Zangão", e: "🐝"}, {n: "Zíper", e: "🤐"},
+                {n: "Zelo", e: "✨"}, {n: "Zelo", e: "✨"}, {n: "Zico", e: "⚽"}, {n: "Zico", e: "⚽"}
+            ],
+            som_k: [
+                {n: "Cama", e: "🛏️"}, {n: "Cabo", e: "🔌"}, {n: "Copo", e: "🥛"}, {n: "Casa", e: "🏠"},
+                {n: "Cama", e: "🛏️"}, {n: "Cabo", e: "🔌"}, {n: "Copo", e: "🥛"}, {n: "Casa", e: "🏠"},
+                {n: "Cão", e: "🐶"}, {n: "Cão", e: "🐶"}, {n: "Chave", e: "🔑"}, {n: "Chave", e: "🔑"}
+            ],
+            som_g: [
+                {n: "Gato", e: "🐱"}, {n: "Gola", e: "👕"}, {n: "Gelo", e: "🧊"}, {n: "Galo", e: "🐓"},
+                {n: "Gato", e: "🐱"}, {n: "Gola", e: "👕"}, {n: "Gelo", e: "🧊"}, {n: "Galo", e: "🐓"},
+                {n: "Gota", e: "💧"}, {n: "Gota", e: "💧"}, {n: "Goiaba", e: "🍈"}, {n: "Goiaba", e: "🍈"}
+            ],
+            p_b: [
+                {n: "Pato", e: "🦆"}, {n: "Bato", e: "🥊"}, {n: "Pia", e: "🚰"}, {n: "Bia", e: "👧"}, 
+                {n: "Pote", e: "🏺"}, {n: "Bote", e: "🛶"}, {n: "Pato", e: "🦆"}, {n: "Bato", e: "🥊"}, 
+                {n: "Pia", e: "🚰"}, {n: "Bia", e: "👧"}, {n: "Pote", e: "🏺"}, {n: "Bote", e: "🛶"}
+            ],
+            t_d: [
+                {n: "Tia", e: "👩‍🏫"}, {n: "Dia", e: "☀️"}, {n: "Tato", e: "🖐️"}, {n: "Dato", e: "📅"}, 
+                {n: "Toca", e: "🕳️"}, {n: "Doca", e: "⚓"}, {n: "Tia", e: "👩‍🏫"}, {n: "Dia", e: "☀️"}, 
+                {n: "Tato", e: "🖐️"}, {n: "Dato", e: "📅"}, {n: "Toca", e: "🕳️"}, {n: "Doca", e: "⚓"}
+            ],
+            f_v: [
+                {n: "Faca", e: "🔪"}, {n: "Vaca", e: "🐮"}, {n: "Fio", e: "🧵"}, {n: "Vio", e: "🎻"}, 
+                {n: "Foca", e: "🦭"}, {n: "Voca", e: "🗣️"}, {n: "Faca", e: "🔪"}, {n: "Vaca", e: "🐮"}, 
+                {n: "Fio", e: "🧵"}, {n: "Vio", e: "🎻"}, {n: "Foca", e: "🦭"}, {n: "Voca", e: "🗣️"}
+            ],
+            s_z: [
+                {n: "Sapo", e: "🐸"}, {n: "Zelo", e: "✨"}, {n: "Selo", e: "✉️"}, {n: "Zero", e: "0️⃣"}, 
+                {n: "Sola", e: "👞"}, {n: "Zola", e: "🌀"}, {n: "Sapo", e: "🐸"}, {n: "Zelo", e: "✨"}, 
+                {n: "Selo", e: "✉️"}, {n: "Zero", e: "0️⃣"}, {n: "Sola", e: "👞"}, {n: "Zola", e: "🌀"}
+            ]
+        };
+
+        let cartasViradas = [];
+        let bloqueioTabuleiro = false;
+        let paresEncontrados = 0;
+        let totalParesJogo = 6;
+
+        function iniciarJogo() {
+            const tipo = document.getElementById('seletorFonema').value;
+            let itensOriginais = [...itensBanco[tipo]];
+            
+            // Embaralhar
+            itensOriginais.sort(() => Math.random() - 0.5);
+            totalParesJogo = itensOriginais.length / 2;
+
+            const grid = document.getElementById('gridMemoria');
+            grid.innerHTML = '';
+            cartasViradas = [];
+            paresEncontrados = 0;
+            document.getElementById('contadorPares').innerText = `${paresEncontrados} / ${totalParesJogo}`;
+
+            itensOriginais.forEach((item, index) => {
+                const carta = document.createElement('div');
+                carta.classList.add('carta');
+                carta.dataset.nome = item.n;
+                carta.dataset.index = index;
+                
+                // Estrutura interna da carta (oculta o emoji e palavra inicialmente)
+                carta.innerHTML = `<span style="font-size: 24px;">⭐</span>`;
+                
+                carta.addEventListener('click', virarCarta);
+                grid.appendChild(carta);
+            });
+        }
+
+        function virarCarta() {
+            if (bloqueioTabuleiro) return;
+            if (this === cartasViradas[0]) return;
+            if (this.classList.contains('encontrada')) return;
+
+            this.classList.add('virada');
+            // Mostra o emoji correspondente à figura e o nome em baixo
+            const nomeItem = this.dataset.nome;
+            let emojiCorrespondente = "❓";
+            
+            // Localiza o emoji correto
+            const tipo = document.getElementById('seletorFonema').value;
+            const achei = itensBanco[tipo].find(i => i.n === nomeItem);
+            if(achei) emojiCorrespondente = achei.e;
+
+            this.innerHTML = `<span class="emoji">${emojiCorrespondente}</span><span class="texto-palavra">${nomeItem}</span>`;
+            cartasViradas.push(this);
+
+            if (cartasViradas.length === 2) {
+                verificarPar();
+            }
+        }
+
+        function verificarPar() {
+            const [carta1, carta2] = cartasViradas;
+
+            if (carta1.dataset.nome === carta2.dataset.nome) {
+                carta1.classList.add('encontrada');
+                carta2.classList.add('encontrada');
+                paresEncontrados++;
+                document.getElementById('contadorPares').innerText = `${paresEncontrados} / ${totalParesJogo}`;
+                cartasViradas = [];
+
+                if (paresEncontrados === totalParesJogo) {
+                    setTimeout(() => {
+                        alert("🎉 Parabéns! Todos os pares foram encontrados com sucesso!");
+                    }, 300);
+                }
+            } else {
+                bloqueioTabuleiro = true;
+                setTimeout(() => {
+                    carta1.classList.remove('virada');
+                    carta1.innerHTML = `<span style="font-size: 24px;">⭐</span>`;
+                    carta2.classList.remove('virada');
+                    carta2.innerHTML = `<span style="font-size: 24px;">⭐</span>`;
+                    cartasViradas = [];
+                    bloqueioTabuleiro = false;
+                }, 1000);
+            }
+        }
+
+        function mudarFonema() {
+            iniciarJogo();
+        }
+
+        function reiniciarJogo() {
+            iniciarJogo();
+        }
+
+        window.onload = iniciarJogo;
+    </script>
+</body>
+</html>

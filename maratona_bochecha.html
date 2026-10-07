@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Maratona da Bochecha - FonoTech</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        h1 { color: #1e293b; margin-bottom: 5px; font-size: 24px; }
+        p.sub { color: #64748b; margin-bottom: 25px; font-size: 14px; }
+        .form-identificacao { margin: 20px 0; padding: 20px; background: #f1f5f9; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .form-identificacao input { padding: 10px; font-size: 15px; width: 80%; max-width: 350px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 8px; outline: none; }
+        .btn-iniciar { background-color: #1d4ed8; color: white; border: none; padding: 10px 25px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; display: block; margin-left: auto; margin-right: auto; }
+        .jogo-area { display: none; }
+        .balao { font-size: 80px; transition: 0.3s; margin: 20px 0; }
+        .voltar-link { display: inline-block; margin-top: 30px; text-decoration: none; color: #64748b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎈 Maratona da Bochecha</h1>
+        <p class="sub">Resistência e tonicidade orofacial</p>
+        <div id="telaIdentificacao" class="form-identificacao">
+            <label style="font-weight: bold; display: block;">Nome do Paciente:</label>
+            <input type="text" id="nomePaciente" placeholder="Nome completo...">
+            <button type="button" class="btn-iniciar" onclick="iniciar()">Iniciar 🚀</button>
+        </div>
+        <div id="telaJogo" class="jogo-area">
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 10px;">Paciente: <strong id="exibirNome"></strong></div>
+            <p>Mantenha as bochechas bem infladas! Clique para inflar o balão:</p>
+            <div class="balao" id="emojiBalao">🎈</div>
+            <button onclick="inflar()" style="padding: 12px 25px; background: #2563eb; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Soprar / Inflar 💨</button>
+        </div>
+        <a href="index.html" class="voltar-link">⬅️ Voltar para a Pasta de Jogos</a>
+    </div>
+    <script>
+        let tamanho = 80;
+        function iniciar() {
+            let nome = document.getElementById('nomePaciente').value;
+            if(!nome) return alert('Digite o nome');
+            document.getElementById('exibirNome').innerText = nome;
+            document.getElementById('telaIdentificacao').style.display = 'none';
+            document.getElementById('telaJogo').style.display = 'block';
+        }
+        function inflar() {
+            if(tamanho < 180) {
+                tamanho += 15;
+                document.getElementById('emojiBalao').style.fontSize = tamanho + 'px';
+            } else {
+                alert("Uau! Balão cheio ao máximo com sucesso!");
+                tamanho = 80;
+                document.getElementById('emojiBalao').style.fontSize = tamanho + 'px';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Qual a Frase Correta? - FonoTech</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .card-imagem-jogo {
+            width: 220px;
+            height: 180px;
+            margin: 0 auto 20px auto;
+            background-color: #e9d8a6;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 90px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn-opcao-frase {
+            width: 100%;
+            background-color: #ffffff;
+            color: #005f73;
+            border: 2px solid #005f73;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-opcao-frase:hover {
+            background-color: #e0f2f1;
+            transform: scale(1.01);
+        }
+
+        .progresso-bar {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progresso-preenchimento {
+            height: 12px;
+            background-color: #0a9396;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div style="display: flex; justify-content: space-between; align-items: center;" class="no-print">
+        <a href="jogos.html">
+            <button type="button">⬅️ Voltar aos Jogos</button>
+        </a>
+        <div style="font-size: 16px; font-weight: bold; color: #005f73;">
+            Pontuação: <span id="pontos">0</span> / 12
+        </div>
+    </div>
+
+    <h1>🖼️ Qual a Frase Correta?</h1>
+    <p>Observe a imagem e selecione a frase que descreve corretamente a cena.</p>
+
+    <div class="card-conteudo">
+        <!-- BARRA DE PROGRESSO -->
+        <div class="progresso-bar">
+            <div id="barraProgresso" class="progresso-preenchimento"></div>
+        </div>
+
+        <!-- SELEÇÃO DE PACIENTE -->
+        <div id="blocoPaciente" style="margin-bottom: 20px;">
+            <label for="nomePacienteJogo"><strong>Nome do Paciente:</strong></label><br>
+            <input type="text" id="nomePacienteJogo" placeholder="Digite o nome para registrar o resultado">
+        </div>
+
+        <!-- ÁREA DO JOGO -->
+        <div id="areaJogo">
+            <h3 id="numeroRodada" style="color: #005f73; text-align: center;">Rodada 1 de 12</h3>
+            
+            <div id="imagemIlustrativa" class="card-imagem-jogo">🐱💤</div>
+
+            <div id="containerOpcoes">
+                <!-- Opções renderizadas via JavaScript -->
+            </div>
+        </div>
+
+        <!-- TELA DE FINALIZAÇÃO -->
+        <div id="telaFinal" style="display: none; text-align: center; padding: 20px;">
+            <h2 style="color: #0a9396;">🎉 Atividade Concluída!</h2>
+            <p id="resultadoTexto" style="font-size: 18px; font-weight: bold; margin: 20px 0;"></p>
+            <button type="button" onclick="reiniciarJogo()" style="background-color: #005f73;">🔄 Jogar Novamente</button>
+        </div>
+    </div>
+
+    <script>
+        // 12 RODADAS COM 12 FIGURAS E 3 ALTERNATIVAS CADA
+        const rodadas = [
+            {
+                emoji: "🐱💤",
+                correta: "O gato está dormindo no sofá.",
+                opcoes: [
+                    "O gato está correndo atrás do rato.",
+                    "O gato está dormindo no sofá.",
+                    "O gato está comendo a ração."
+                ]
+            },
+            {
+                emoji: "🐶🦴",
+                correta: "O cachorro roi um osso grande.",
+                opcoes: [
+                    "O cachorro roi um osso grande.",
+                    "O cachorro bebe água no pote.",
+                    "O cachorro pula a cerca do jardim."
+                ]
+            },
+            {
+                emoji: "👧🚲",
+                correta: "A menina anda de bicicleta no parque.",
+                opcoes: [
+                    "A menina anda de patins na calçada.",
+                    "A menina lê um livro na biblioteca.",
+                    "A menina anda de bicicleta no parque."
+                ]
+            },
+            {
+                emoji: "👦⚽",
+                correta: "O menino chuta a bola de futebol.",
+                opcoes: [
+                    "O menino chuta a bola de futebol.",
+                    "O menino joga basquete na quadra.",
+                    "O menino anda de skate na praça."
+                ]
+            },
+            {
+                emoji: "☀️🏖️",
+                correta: "O sol brilha na praia de manhã.",
+                opcoes: [
+                    "Está chovendo forte na cidade.",
+                    "O sol brilha na praia de manhã.",
+                    "A lua ilumina a noite fria."
+                ]
+            },
+            {
+                emoji: "👩‍🏫📚",
+                correta: "A professora ensina a lição aos alunos.",
+                opcoes: [
+                    "A médica cuida do paciente no hospital.",
+                    "A cozinheira faz um bolo gostoso.",
+                    "A professora ensina a lição aos alunos."
+                ]
+            },
+            {
+                emoji: "🚗💨",
+                correta: "O carro vermelho anda rápido na rua.",
+                opcoes: [
+                    "O carro vermelho anda rápido na rua.",
+                    "O caminhão azul está estacionado.",
+                    "O avião voa alto entre as nuvens."
+                ]
+            },
+            {
+                emoji: "👨‍🍳🍕",
+                correta: "O cozinheiro assa uma pizza deliciosa.",
+                opcoes: [
+                    "O menino come um sorvete de morango.",
+                    "O cozinheiro assa uma pizza deliciosa.",
+                    "O padeiro vende pão quentinho."
+                ]
+            },
+            {
+                emoji: "🌧️☔",
+                correta: "A menina usa o guarda-chuva na chuva.",
+                opcoes: [
+                    "A menina usa óculos de sol na praia.",
+                    "A menina usa o guarda-chuva na chuva.",
+                    "A menina toma banho na piscina."
+                ]
+            },
+            {
+                emoji: "🐸💧",
+                correta: "O sapo pula na lagoa verde.",
+                opcoes: [
+                    "O sapo pula na lagoa verde.",
+                    "O pássaro canta na árvore alta.",
+                    "O peixe nada no fundo do mar."
+                ]
+            },
+            {
+                emoji: "🐝🌻",
+                correta: "A abelha voa perto da girassol amarela.",
+                opcoes: [
+                    "A borboleta descansa na folha secas.",
+                    "A formiga carrega a folha verde.",
+                    "A abelha voa perto da girassol amarela."
+                ]
+            },
+            {
+                emoji: "🎂🎈",
+                correta: "As crianças comemoram a festa de aniversário.",
+                opcoes: [
+                    "As crianças comemoram a festa de aniversário.",
+                    "As crianças dormem no quarto grande.",
+                    "As crianças estudam para a prova final."
+                ]
+            }
+        ];
+
+        let indiceRodada = 0;
+        let pontuacao = 0;
+
+        document.addEventListener("DOMContentLoaded", carregarRodada);
+
+        function carregarRodada() {
+            if (indiceRodada >= rodadas.length) {
+                finalizarJogo();
+                return;
+            }
+
+            let r = rodadas[indiceRodada];
+            document.getElementById("numeroRodada").innerText = `Rodada ${indiceRodada + 1} de 12`;
+            document.getElementById("imagemIlustrativa").innerText = r.emoji;
+
+            // Atualiza barra de progresso
+            let pct = ((indiceRodada + 1) / rodadas.length) * 100;
+            document.getElementById("barraProgresso").style.width = pct + "%";
+
+            let container = document.getElementById("containerOpcoes");
+            container.innerHTML = "";
+
+            r.opcoes.forEach(opcao => {
+                let btn = document.createElement("button");
+                btn.className = "btn-opcao-frase";
+                btn.innerText = opcao;
+                btn.onclick = function () { checarResposta(opcao, r.correta); };
+                container.appendChild(btn);
+            });
+        }
+
+        function checarResposta(respostaSelecionada, respostaCorreta) {
+            if (respostaSelecionada === respostaCorreta) {
+                pontuacao++;
+                document.getElementById("pontos").innerText = pontuacao;
+                alert("✨ Muito bem! Frase correta.");
+            } else {
+                alert("❌ Ops! A frase correta era:\n\"" + respostaCorreta + "\"");
+            }
+
+            indiceRodada++;
+            carregarRodada();
+        }
+
+        function finalizarJogo() {
+            document.getElementById("areaJogo").style.display = "none";
+            document.getElementById("telaFinal").style.display = "block";
+
+            let nome = document.getElementById("nomePacienteJogo").value.trim() || "Paciente Não Identificado";
+            document.getElementById("resultadoTexto").innerText = `${nome} acertou ${pontuacao} de 12 frases!`;
+
+            // Salva no histórico do paciente
+            if (nome !== "Paciente Não Identificado") {
+                let chave = "historico_" + nome.toLowerCase();
+                let historico = JSON.parse(localStorage.getItem(chave)) || [];
+                
+                historico.push({
+                    jogo: "Qual a Frase Correta?",
+                    sessao: historico.length + 1,
+                    pontuacao: `${pontuacao} de 12`,
+                    data: new Date().toLocaleDateString("pt-BR")
+                });
+
+                localStorage.setItem(chave, JSON.stringify(historico));
+            }
+        }
+
+        function reiniciarJogo() {
+            indiceRodada = 0;
+            pontuacao = 0;
+            document.getElementById("pontos").innerText = "0";
+            document.getElementById("areaJogo").style.display = "block";
+            document.getElementById("telaFinal").style.display = "none";
+            carregarRodada();
+        }
+    </script>
+
+</body>
+
+</html>

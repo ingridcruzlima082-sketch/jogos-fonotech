@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Jogo da Forca - FonoTech</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        h1 { color: #1e293b; margin-bottom: 5px; font-size: 24px; }
+        p.sub { color: #64748b; margin-bottom: 25px; font-size: 14px; }
+        .form-identificacao {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+        }
+        .form-identificacao input {
+            padding: 10px;
+            font-size: 15px;
+            width: 80%;
+            max-width: 350px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            margin-top: 8px;
+            outline: none;
+        }
+        .btn-iniciar {
+            background-color: #1d4ed8;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .btn-iniciar:hover { background-color: #1e40af; }
+        .jogo-area { display: none; }
+        .forca-desenho {
+            font-family: monospace;
+            font-size: 22px;
+            line-height: 1.2;
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #334155;
+        }
+        .dica-box {
+            font-size: 18px;
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 15px;
+        }
+        .palavra-secreta {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 25px 0;
+            font-size: 36px;
+            font-weight: bold;
+            letter-spacing: 5px;
+        }
+        .letra-slot {
+            border-bottom: 3px solid #3b82f6;
+            width: 45px;
+            text-align: center;
+            color: #1e293b;
+        }
+        .teclado-virtual {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .btn-teclado {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-teclado:hover:not(:disabled) { background-color: #1d4ed8; }
+        .btn-teclado:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+        }
+        .mensagem {
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 20px;
+            min-height: 24px;
+        }
+        .voltar-link {
+            display: inline-block;
+            margin-top: 30px;
+            text-decoration: none;
+            color: #64748b;
+            font-weight: bold;
+        }
+        .voltar-link:hover { color: #1e293b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Jogo da Forca Clínico</h1>
+        <p class="sub">Estímulo de vocabulário e ortografia</p>
+
+        <!-- TELA DE IDENTIFICAÇÃO -->
+        <div id="telaIdentificacao" class="form-identificacao">
+            <label for="nomePaciente" style="font-weight: bold; color: #1e293b; display: block;">Nome do Paciente:</label>
+            <input type="text" id="nomePaciente" placeholder="Digite o nome completo do paciente...">
+            <button type="button" class="btn-iniciar" onclick="iniciarAtividade()">Iniciar Atividade 🚀</button>
+        </div>
+
+        <!-- ÁREA DO JOGO -->
+        <div id="telaJogo" class="jogo-area">
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 10px;">Paciente: <strong id="exibirNome" style="color: #1e293b;"></strong></div>
+            <div>Rodada <span id="numRodada">1</span> de 15</div>
+            
+            <div class="dica-box" id="dicaTexto"></div>
+            
+            <div class="forca-desenho" id="forcaDesenho">
+                +---+<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;|<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;|<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;|<br>
+                &nbsp;&nbsp;===
+            </div>
+
+            <div class="palavra-secreta" id="palavraSecreta"></div>
+
+            <div class="teclado-virtual" id="tecladoVirtual"></div>
+
+            <div class="mensagem" id="mensagemFeedback"></div>
+        </div>
+
+        <div>
+            <a href="index.html" class="voltar-link">⬅️ Voltar para a Pasta de Jogos</a>
+        </div>
+    </div>
+
+    <script>
+        const listaPalavras = [
+            { palavra: "PATO", dica: "🦆 Animal / Aves" },
+            { palavra: "BOLA", dica: "⚽ Brinquedos" },
+            { palavra: "CASA", dica: "🏠 Locais" },
+            { palavra: "GATO", dica: "🐱 Animais" },
+            { palavra: "FACA", dica: "🔪 Utensílios" },
+            { palavra: "SAPO", dica: "🐸 Animais" },
+            { palavra: "MESA", dica: "🪑 Móveis" },
+            { palavra: "LUA", dica: "🌙 Natureza" },
+            { palavra: "SOL", dica: "☀️ Natureza" },
+            { palavra: "DADO", dica: "🎲 Brinquedos" },
+            { palavra: "BOTA", dica: "👢 Vestuário" },
+            { palavra: "ROSA", dica: "🌹 Flores" },
+            { palavra: "UVA", dica: "🍇 Alimentos" },
+            { palavra: "COPO", dica: "🥛 Utensílios" },
+            { palavra: "LIVRO", dica: "📚 Escola" }
+        ];
+
+        let rodadaAtual = 0;
+        let palavraAtual = "";
+        let letrasDescobertas = [];
+        let erros = 0;
+        const maxErros = 6;
+
+        function iniciarAtividade() {
+            const nome = document.getElementById('nomePaciente').value.trim();
+            if (!nome) {
+                alert("Por favor, digite o nome do paciente antes de iniciar.");
+                return;
+            }
+            document.getElementById('exibirNome').innerText = nome;
+            document.getElementById('telaIdentificacao').style.display = 'none';
+            document.getElementById('telaJogo').style.display = 'block';
+            carregarRodada();
+        }
+
+        function carregarRodada() {
+            if (rodadaAtual >= listaPalavras.length) {
+                document.getElementById('telaJogo').innerHTML = `
+                    <h1>🎉 Parabéns!</h1>
+                    <p class="sub">Todas as 15 rodadas do Jogo da Forca foram concluídas com sucesso!</p>
+                    <button onclick="location.reload()" style="padding:10px 20px; background:#1d4ed8; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Reiniciar Jogo</button>
+                `;
+                return;
+            }
+
+            erros = 0;
+            const item = listaPalavras[rodadaAtual];
+            palavraAtual = item.palavra;
+            letrasDescobertas = Array(palavraAtual.length).fill("_");
+            
+            document.getElementById('numRodada').innerText = rodadaAtual + 1;
+            document.getElementById('dicaTexto').innerText = `Dica: ${item.dica}`;
+            document.getElementById('mensagemFeedback').innerText = "";
+
+            atualizarForca();
+            atualizarTelaPalavra();
+            criarTeclado();
+        }
+
+        function atualizarTelaPalavra() {
+            const display = document.getElementById('palavraSecreta');
+            display.innerHTML = '';
+            letrasDescobertas.forEach(l => {
+                const slot = document.createElement('div');
+                slot.classList.add('letra-slot');
+                slot.innerText = l;
+                display.appendChild(slot);
+            });
+        }
+
+        function criarTeclado() {
+            const teclado = document.getElementById('tecladoVirtual');
+            teclado.innerHTML = '';
+            const alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+            
+            alfabeto.forEach(letra => {
+                const btn = document.createElement('button');
+                btn.classList.add('btn-teclado');
+                btn.innerText = letra;
+                btn.id = `btn_${letra}`;
+                btn.onclick = () => escolherLetra(letra);
+                teclado.appendChild(btn);
+            });
+        }
+
+        function escolherLetra(letra) {
+            const btn = document.getElementById(`btn_${letra}`);
+            btn.disabled = true;
+
+            if (palavraAtual.includes(letra)) {
+                for (let i = 0; i < palavraAtual.length; i++) {
+                    if (palavraAtual[i] === letra) {
+                        letrasDescobertas[i] = letra;
+                    }
+                }
+                atualizarTelaPalavra();
+
+                if (!letrasDescobertas.includes("_")) {
+                    document.getElementById('mensagemFeedback').style.color = "#16a34a";
+                    document.getElementById('mensagemFeedback').innerText = "✨ Palavra descoberta com sucesso! Próxima rodada em instantes...";
+                    desativarTecladoInteiro();
+                    rodadaAtual++;
+                    setTimeout(carregarRodada, 1800);
+                }
+            } else {
+                erros++;
+                atualizarForca();
+
+                if (erros >= maxErros) {
+                    document.getElementById('mensagemFeedback').style.color = "#dc2626";
+                    document.getElementById('mensagemFeedback').innerText = `❌ Fim de jogo nesta rodada! A palavra era: ${palavraAtual}`;
+                    desativarTecladoInteiro();
+                    rodadaAtual++;
+                    setTimeout(carregarRodada, 2500);
+                }
+            }
+        }
+
+        function desativarTecladoInteiro() {
+            const botoes = document.querySelectorAll('.btn-teclado');
+            botoes.forEach(b => b.disabled = true);
+        }
+
+        function atualizarForca() {
+            const estagios = [
+                `+---+\n    |\n    |\n    |\n  ===`,
+                `+---+\n O  |\n    |\n    |\n  ===`,
+                `+---+\n O  |\n |  |\n    |\n  ===`,
+                `+---+\n O  |\n/|  |\n    |\n  ===`,
+                `+---+\n O  |\n/|\\ |\n    |\n  ===`,
+                `+---+\n O  |\n/|\\ |\n/   |\n  ===`,
+                `+---+\n O  |\n/|\\ |\n/ \\ |\n  ===`
+            ];
+            document.getElementById('forcaDesenho').innerHTML = estagios[erros].replace(/\n/g, '<br>');
+        }
+    </script>
+</body>
+</html>

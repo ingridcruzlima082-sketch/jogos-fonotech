@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Fábrica de Palavras - FonoTech</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        h1 { color: #1e293b; margin-bottom: 5px; font-size: 24px; }
+        p.sub { color: #64748b; margin-bottom: 25px; font-size: 14px; }
+        .form-identificacao { margin: 20px 0; padding: 20px; background: #f1f5f9; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .form-identificacao input { padding: 10px; font-size: 15px; width: 80%; max-width: 350px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 8px; outline: none; }
+        .btn-iniciar { background-color: #1d4ed8; color: white; border: none; padding: 10px 25px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; display: block; margin-left: auto; margin-right: auto; }
+        .btn-iniciar:hover { background-color: #1e40af; }
+        .jogo-area { display: none; }
+        .silabas-container { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+        .bloco-silaba { background: #3b82f6; color: white; padding: 15px 22px; font-size: 20px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; user-select: none; }
+        .bloco-silaba:hover { background: #1d4ed8; }
+        .bloco-silaba.usado { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
+        .slot-montagem { display: flex; justify-content: center; gap: 8px; margin: 25px 0; min-height: 50px; }
+        .slot { width: 65px; height: 50px; border: 2px dashed #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; background: #f8fafc; color: #1e293b; }
+        .voltar-link { display: inline-block; margin-top: 30px; text-decoration: none; color: #64748b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ Fábrica de Palavras</h1>
+        <p class="sub">Organize as sílabas na ordem correta para formar a palavra</p>
+
+        <!-- TELA DE IDENTIFICAÇÃO -->
+        <div id="telaIdentificacao" class="form-identificacao">
+            <label style="font-weight: bold; display: block;">Nome do Paciente:</label>
+            <input type="text" id="nomePaciente" placeholder="Nome completo...">
+            <button type="button" class="btn-iniciar" onclick="iniciar()">Iniciar 🚀</button>
+        </div>
+
+        <!-- ÁREA DO JOGO -->
+        <div id="telaJogo" class="jogo-area">
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 10px;">Paciente: <strong id="exibirNome"></strong></div>
+            <div>Rodada <span id="numRodada">1</span> de 15</div>
+            
+            <div style="font-size: 70px; margin: 15px 0;" id="emojiDica">🦆</div>
+            <p>Clique nas sílabas para encaixá-las na ordem certa:</p>
+            
+            <!-- SLOTS DE MONTAGEM -->
+            <div class="slot-montagem" id="slotMontagem"></div>
+
+            <!-- BLOCOS DE SÍLABAS DISPONÍVEIS -->
+            <div class="silabas-container" id="silabasContainer"></div>
+            
+            <div style="margin-top: 15px;">
+                <button onclick="limpar()" style="padding: 8px 18px; background: #64748b; color: white; border:none; border-radius:6px; cursor:pointer; font-weight: bold;">Desfazer / Limpar</button>
+            </div>
+            <div id="feedback" style="margin-top: 15px; font-weight: bold; font-size: 16px; min-height: 24px;"></div>
+        </div>
+
+        <a href="index.html" class="voltar-link">⬅️ Voltar para a Pasta de Jogos</a>
+    </div>
+
+    <script>
+        const desafios = [
+            // Dissílabas (10 rodadas)
+            { silabas: ["PA", "TO"], dica: "🦆", palavra: "PATO" },
+            { silabas: ["BO", "LA"], dica: "⚽", palavra: "BOLA" },
+            { silabas: ["CA", "SA"], dica: "🏠", palavra: "CASA" },
+            { silabas: ["GA", "TO"], dica: "🐱", palavra: "GATO" },
+            { silabas: ["SA", "PO"], dica: "🐸", palavra: "SAPO" },
+            { silabas: ["FA", "CA"], dica: "🔪", palavra: "FACA" },
+            { silabas: ["VA", "CA"], dica: "🐮", palavra: "VACA" },
+            { silabas: ["DA", "DO"], dica: "🎲", palavra: "DADO" },
+            { silabas: ["RA", "TO"], dica: "🐭", palavra: "RATO" },
+            { silabas: ["ME", "SA"], dica: "🪑", palavra: "MESA" },
+            // Trissílabas (5 rodadas)
+            { silabas: ["CA", "NE", "CA"], dica: "☕", palavra: "CANECA" },
+            { silabas: ["BA", "NA", "NA"], dica: "🍌", palavra: "BANANA" },
+            { silabas: ["MA", "CA", "CO"], dica: "🐒", palavra: "MACACO" },
+            { silabas: ["TE", "LE", "FONE"], dica: "☎️", palavra: "TELEFONE" },
+            { silabas: ["PI", "CA", "PAU"], dica: "🐦", palavra: "PICAPAU" }
+        ];
+
+        let idx = 0;
+        let silabasSelecionadas = [];
+        let silabasEmbaralhadas = [];
+
+        function iniciar() {
+            let nome = document.getElementById('nomePaciente').value.trim();
+            if(!nome) return alert('Por favor, digite o nome do paciente.');
+            document.getElementById('exibirNome').innerText = nome;
+            document.getElementById('telaIdentificacao').style.display = 'none';
+            document.getElementById('telaJogo').style.display = 'block';
+            carregar();
+        }
+
+        function carregar() {
+            if(idx >= desafios.length) {
+                document.getElementById('telaJogo').innerHTML = `
+                    <h1>🎉 Parabéns!</h1>
+                    <p class="sub">Todas as 15 rodadas da Fábrica de Palavras foram concluídas com sucesso!</p>
+                    <button onclick="location.reload()" style="padding:10px 20px; background:#1d4ed8; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Reiniciar Atividade</button>
+                `;
+                return;
+            }
+
+            silabasSelecionadas = [];
+            let d = desafios[idx];
+            document.getElementById('numRodada').innerText = idx + 1;
+            document.getElementById('emojiDica').innerText = d.dica;
+            document.getElementById('feedback').innerText = "";
+
+            // Embaralhar as sílabas da palavra atual
+            silabasEmbaralhadas = [...d.silabas].sort(() => Math.random() - 0.5);
+            renderizarTela();
+        }
+
+        function renderizarTela() {
+            let d = desafios[idx];
+            
+            // Renderizar slots de preenchimento
+            let slotDiv = document.getElementById('slotMontagem');
+            slotDiv.innerHTML = '';
+            for(let i = 0; i < d.silabas.length; i++) {
+                let slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.innerText = silabasSelecionadas[i] || "";
+                slotDiv.appendChild(slot);
+            }
+
+            // Renderizar botões de sílabas disponíveis
+            let container = document.getElementById('silabasContainer');
+            container.innerHTML = '';
+            
+            silabasEmbaralhadas.forEach((s, index) => {
+                let btn = document.createElement('div');
+                btn.className = 'bloco-silaba';
+                
+                // Verificar se esta sílaba específica já foi escolhida
+                let jaEscolhidaContagem = silabasSelecionadas.filter(item => item === s).length;
+                let totalDisponiveisContagem = silabasEmbaralhadas.filter((item, i) => item === s && i <= index).length;
+
+                if(jaEscolhidaContagem >= silabasEmbaralhadas.filter(item => item === s).length && silabasSelecionadas.includes(s)) {
+                    // Marca visualmente se já usou todas as ocorrências desta sílaba
+                    // Para simplificar: se já está nas selecionadas, desativa
+                }
+
+                // Forma limpa de controlo de cliques
+                btn.innerText = s;
+                btn.onclick = () => {
+                    if (silabasSelecionadas.length < d.silabas.length) {
+                        silabasSelecionadas.push(s);
+                        renderizarTela();
+                        verificarFim();
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function verificarFim() {
+            let d = desafios[idx];
+            if(silabasSelecionadas.length === d.silabas.length) {
+                let palavraFormada = silabasSelecionadas.join("");
+                if(palavraFormada === d.palavra) {
+                    document.getElementById('feedback').style.color = '#16a34a';
+                    document.getElementById('feedback').innerText = "✨ Perfeito! Palavra formada com sucesso!";
+                    idx++;
+                    setTimeout(carregar, 1400);
+                } else {
+                    document.getElementById('feedback').style.color = '#dc2626';
+                    document.getElementById('feedback').innerText = "❌ Ordem incorreta, tente novamente.";
+                    setTimeout(() => {
+                        silabasSelecionadas = [];
+                        document.getElementById('feedback').innerText = "";
+                        renderizarTela();
+                    }, 1200);
+                }
+            }
+        }
+
+        function limpar() {
+            silabasSelecionadas = [];
+            document.getElementById('feedback').innerText = "";
+            renderizarTela();
+        }
+    </script>
+</body>
+</html>

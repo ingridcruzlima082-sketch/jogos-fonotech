@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Lince da Nomeação - FonoTech</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .grid-lince {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .card-figura {
+            background-color: #ffffff;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 50px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+            user-select: none;
+        }
+
+        .card-figura:hover {
+            transform: scale(1.05);
+            border-color: #e76f51;
+        }
+
+        .painel-alvo {
+            background-color: #ffffff;
+            border: 3px dashed #e76f51;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            max-width: 300px;
+            margin: 0 auto 20px auto;
+        }
+
+        .tempo-destaque {
+            font-size: 22px;
+            font-weight: bold;
+            color: #d90429;
+        }
+
+        .painel-sessao-destaque {
+            background-color: #fff3bf;
+            border: 1px solid #ffe066;
+            border-radius: 8px;
+            padding: 10px 15px;
+            display: inline-block;
+            margin-top: 10px;
+            color: #856404;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="no-print" style="display: flex; justify-content: space-between; align-items: center;">
+        <a href="jogos.html">
+            <button type="button">⬅️ Voltar aos Jogos</button>
+        </a>
+    </div>
+
+    <h1 style="text-align: center; color: #e76f51;">👁️ Lince da Nomeação Rápida</h1>
+    <p style="text-align: center;">Ache a figura destacada no tabuleiro e faça a nomeação antes que o tempo se esgote!</p>
+
+    <!-- IDENTIFICAÇÃO DO PACIENTE -->
+    <div style="text-align: center; margin-bottom: 20px;" class="no-print">
+        <label for="pacienteJogo"><strong>Paciente:</strong></label>
+        <input type="text" id="pacienteJogo" placeholder="Digite o nome do paciente" style="width: 250px; display: inline-block;" oninput="verificarSessoesAnteriores()">
+        <button onclick="iniciarPartida()" style="background-color: #e76f51;">🚀 Iniciar Partida (10 Rodadas)</button>
+
+        <br>
+        <div id="painelInfoSessao" class="painel-sessao-destaque" style="display: none;"></div>
+    </div>
+
+    <!-- ÁREA DO JOGO -->
+    <div id="areaJogo" style="display: none;">
+
+        <div style="display: flex; justify-content: space-around; align-items: center; max-width: 600px; margin: 0 auto;">
+            <div>
+                <h3>🎯 Rodada: <span id="numeroRodada" style="color: #e76f51;">1</span>/10</h3>
+            </div>
+            <div>
+                <h3>🏆 Acertos: <span id="contadorAcertos" style="color: #2a9d8f;">0</span></h3>
+            </div>
+            <div>
+                <h3>⏳ Tempo: <span id="cronometro" class="tempo-destaque">10</span>s</h3>
+            </div>
+        </div>
+
+        <div class="painel-alvo">
+            <p style="margin: 0; font-size: 14px; font-weight: bold; color: #555;">ENCONTRE E NOMEIE:</p>
+            <div id="figuraAlvo" style="font-size: 70px; margin-top: 5px;">❓</div>
+            <p id="nomeFiguraAlvo" style="font-size: 18px; font-weight: bold; color: #e76f51; margin-bottom: 0;"></p>
+        </div>
+
+        <div class="grid-lince" id="tabuleiro"></div>
+    </div>
+
+    <script>
+        const nomeDoJogoAtual = "Lince da Nomeação Rápida";
+
+        const bancoFiguras = [
+            { emoji: "🐶", nome: "CACHORRO" },
+            { emoji: "🐱", nome: "GATO" },
+            { emoji: "🍎", nome: "MAÇÃ" },
+            { emoji: "🚗", nome: "CARRO" },
+            { emoji: "⚽", nome: "BOLA" },
+            { emoji: "🍌", nome: "BANANA" },
+            { emoji: "✈️", nome: "AVIÃO" },
+            { emoji: "🦁", nome: "LEÃO" },
+            { emoji: "☀️", nome: "SOL" },
+            { emoji: "🐟", nome: "PEIXE" },
+            { emoji: "🔑", nome: "CHAVE" },
+            { emoji: "🐸", nome: "SAPO" }
+        ];
+
+        let acertos = 0;
+        let rodadaAtual = 0;
+        const totalRodadas = 10;
+        let figuraAtual = null;
+        let tempoRestante = 10;
+        let timer = null;
+        let numeroProximaSessao = 1;
+
+        // FILTRA AS SESSÕES ESPECÍFICAS DESTE JOGO (LINCE)
+        function verificarSessoesAnteriores() {
+            let nome = document.getElementById("pacienteJogo").value.trim();
+            let painel = document.getElementById("painelInfoSessao");
+
+            if (nome === "") {
+                painel.style.display = "none";
+                return;
+            }
+
+            let chave = "historico_" + nome.toLowerCase();
+            let historicoGeral = JSON.parse(localStorage.getItem(chave)) || [];
+            
+            // Filtra só os registros de "Lince da Nomeação Rápida"
+            let historicoDoJogo = historicoGeral.filter(r => r.jogo === nomeDoJogoAtual);
+            
+            numeroProximaSessao = historicoDoJogo.length + 1;
+
+            painel.style.display = "inline-block";
+            if (historicoDoJogo.length === 0) {
+                painel.innerHTML = "📌 Primeira sessão de <strong>" + nomeDoJogoAtual + "</strong> para " + nome + "!";
+            } else {
+                painel.innerHTML = "📊 <strong>" + nome + "</strong> já realizou " + historicoDoJogo.length + " sessão(ões) de <strong>" + nomeDoJogoAtual + "</strong>. Iniciando a <strong>Sessão Nº " + numeroProximaSessao + "</strong>!";
+            }
+        }
+
+        function iniciarPartida() {
+            let nome = document.getElementById("pacienteJogo").value.trim();
+            if (nome === "") {
+                alert("Por favor, digite o nome do paciente antes de iniciar.");
+                return;
+            }
+
+            verificarSessoesAnteriores();
+
+            acertos = 0;
+            rodadaAtual = 0;
+            document.getElementById("contadorAcertos").innerText = acertos;
+            document.getElementById("areaJogo").style.display = "block";
+
+            proximaRodada();
+        }
+
+        function proximaRodada() {
+            clearInterval(timer);
+            rodadaAtual++;
+
+            if (rodadaAtual > totalRodadas) {
+                finalizarSessao();
+                return;
+            }
+
+            document.getElementById("numeroRodada").innerText = rodadaAtual;
+            tempoRestante = 10;
+            document.getElementById("cronometro").innerText = tempoRestante;
+
+            figuraAtual = bancoFiguras[Math.floor(Math.random() * bancoFiguras.length)];
+            document.getElementById("figuraAlvo").innerText = figuraAtual.emoji;
+            document.getElementById("nomeFiguraAlvo").innerText = figuraAtual.nome;
+
+            let opcoes = [...bancoFiguras].sort(() => 0.5 - Math.random()).slice(0, 7);
+            if (!opcoes.some(item => item.nome === figuraAtual.nome)) {
+                opcoes[0] = figuraAtual;
+            }
+            opcoes.sort(() => 0.5 - Math.random());
+
+            let tabuleiro = document.getElementById("tabuleiro");
+            tabuleiro.innerHTML = "";
+
+            opcoes.forEach(item => {
+                let card = document.createElement("div");
+                card.className = "card-figura";
+                card.innerText = item.emoji;
+                card.onclick = () => verificarEscolha(item);
+                tabuleiro.appendChild(card);
+            });
+
+            timer = setInterval(() => {
+                tempoRestante--;
+                document.getElementById("cronometro").innerText = tempoRestante;
+
+                if (tempoRestante <= 0) {
+                    clearInterval(timer);
+                    alert("⏰ O tempo acabou para essa figura!");
+                    proximaRodada();
+                }
+            }, 1000);
+        }
+
+        function verificarEscolha(itemSelecionado) {
+            clearInterval(timer);
+
+            if (itemSelecionado.nome === figuraAtual.nome) {
+                acertos++;
+                document.getElementById("contadorAcertos").innerText = acertos;
+                alert("✨ Muito bem! Você nomeou: " + figuraAtual.nome);
+            } else {
+                alert("❌ Ops! Essa não era a figura certa.");
+            }
+
+            proximaRodada();
+        }
+
+        function finalizarSessao() {
+            clearInterval(timer);
+            let nome = document.getElementById("pacienteJogo").value.trim();
+            let chave = "historico_" + nome.toLowerCase();
+
+            let historicoGeral = JSON.parse(localStorage.getItem(chave)) || [];
+
+            historicoGeral.push({
+                sessao: numeroProximaSessao,
+                jogo: nomeDoJogoAtual,
+                pontuacao: acertos + " de " + totalRodadas,
+                data: new Date().toLocaleDateString("pt-BR")
+            });
+
+            localStorage.setItem(chave, JSON.stringify(historicoGeral));
+
+            alert("🎉 Fim de jogo!\n\nPaciente: " + nome + "\nHabilidade: " + nomeDoJogoAtual + "\nSessão: Nº " + numeroProximaSessao + "\nPontuação Final: " + acertos + " acertos em 10 rodadas.");
+            
+            verificarSessoesAnteriores();
+            document.getElementById("areaJogo").style.display = "none";
+        }
+    </script>
+
+</body>
+
+</html>

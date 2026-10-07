@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Caça-Fonemas - FonoTech</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .container-jogo {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            border: 2px solid #7209b7;
+            padding-bottom: 70px;
+        }
+
+        .painel-selecao {
+            background-color: #f8f9fa;
+            border: 2px dashed #7209b7;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .botoes-fonemas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .btn-fonema {
+            background-color: #e0aaff;
+            color: #3c096c;
+            border: 2px solid #7209b7;
+            padding: 10px 16px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-fonema.ativo {
+            background-color: #7209b7;
+            color: #ffffff;
+        }
+
+        .alvo-sorteado {
+            background-color: #fff3bf;
+            border: 3px solid #ee9b00;
+            border-radius: 14px;
+            padding: 15px;
+            margin: 15px 0;
+            display: inline-block;
+            min-width: 250px;
+        }
+
+        .figura-alvo {
+            font-size: 65px;
+            display: block;
+            margin: 5px 0;
+        }
+
+        .grid-lince {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .carta-lince {
+            background-color: #f8f9fa;
+            border: 2px solid #ced4da;
+            border-radius: 12px;
+            padding: 15px 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 90px;
+        }
+
+        .carta-lince:hover {
+            transform: scale(1.05);
+            border-color: #7209b7;
+            background-color: #f3e8ff;
+        }
+
+        .carta-lince .emoji {
+            font-size: 40px;
+        }
+
+        .carta-lince .nome {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        .mensagem-feedback {
+            font-size: 20px;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        .sucesso { color: #2b9348; }
+        .erro { color: #ae2012; }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #005f73;
+            color: #ffffff;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="jogos.html" class="no-print">
+        <button type="button">⬅️ Voltar aos Jogos</button>
+    </a>
+
+    <div class="container-jogo">
+        <h1 style="color: #7209b7; margin-top: 0;">🎯 Caça-Fonemas</h1>
+        <p style="color: #555;">Selecione o fonema-alvo da sessão e encontre a figura sorteada no tabuleiro!</p>
+
+        <div class="campo-form no-print" style="max-width: 350px; margin: 0 auto 15px auto;">
+            <label for="nomePaciente"><strong>Paciente:</strong></label>
+            <input type="text" id="nomePaciente" placeholder="Digite o nome do paciente" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; text-align: center;">
+        </div>
+
+        <!-- SELEÇÃO DE FONEMAS -->
+        <div class="painel-selecao no-print">
+            <strong>🎯 Selecione o Fonema para Treino:</strong>
+            <div class="botoes-fonemas">
+                <button class="btn-fonema ativo" onclick="selecionarFonema('r_vibrante', this)">Fonema /r/ Vibrante</button>
+                <button class="btn-fonema" onclick="selecionarFonema('s', this)">Fonema /s/</button>
+                <button class="btn-fonema" onclick="selecionarFonema('ch', this)">Fonema /ch/ (X)</button>
+                <button class="btn-fonema" onclick="selecionarFonema('j', this)">Fonema /j/ (G)</button>
+                <button class="btn-fonema" onclick="selecionarFonema('l', this)">Fonema /l/</button>
+                <button class="btn-fonema" onclick="selecionarFonema('encontros', this)">Encontros Consonantais</button>
+            </div>
+        </div>
+
+        <!-- ALVO SORTEADO -->
+        <div class="alvo-sorteado">
+            <span style="font-size: 14px; color: #555; font-weight: bold;">ENCONTRE NO TABULEIRO:</span>
+            <span class="figura-alvo" id="emojiAlvo">❓</span>
+            <span id="nomeAlvo" style="font-size: 18px; font-weight: bold; color: #005f73;">Clique em Sortear</span>
+        </div>
+
+        <div class="mensagem-feedback" id="feedback"></div>
+
+        <!-- TABULEIRO DE BUSCA -->
+        <div class="grid-lince" id="tabuleiroLince">
+            <!-- Gerado via JavaScript -->
+        </div>
+
+        <!-- CONTROLES -->
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;" class="no-print">
+            <button type="button" onclick="sortearNovoAlvo()" style="background-color: #ee9b00;">🎲 Sortear Nova Figura</button>
+            <button type="button" onclick="salvarHistorico()" style="background-color: #2b9348;">💾 Salvar Sessão no Histórico</button>
+        </div>
+    </div>
+
+    <!-- RODAPÉ FIXO -->
+    <footer class="no-print">
+        <p><strong>Ingrid Cruz</strong> | Fonoaudióloga | CRFa 8-13571</p>
+    </footer>
+
+    <script>
+        const bancoFonemas = {
+            r_vibrante: [
+                { emoji: "👑", nome: "REI" },
+                { emoji: "🏴‍☠️", nome: "PIRATA" },
+                { emoji: "🍐", nome: "PÊRA" },
+                { emoji: "🕷️", nome: "ARANHA" },
+                { emoji: "🚀", nome: "FOGUETE" },
+                { emoji: "🐸", nome: "JACARÉ / FROG" },
+                { emoji: "🐙", nome: "POLVO" },
+                { emoji: "🌽", nome: "MILHO" }
+            ],
+            s: [
+                { emoji: "🐸", nome: "SAPO" },
+                { emoji: "☀️", nome: "SOL" },
+                { emoji: "👟", nome: "SAPATO" },
+                { emoji: "🐍", nome: "SERPENTE" },
+                { emoji: "🍉", nome: "MELANCIA" },
+                { emoji: "🏰", nome: "CASTELO" },
+                { emoji: "🔔", nome: "SINO" },
+                { emoji: "🧃", nome: "SUCO" }
+            ],
+            ch: [
+                { emoji: "🔑", nome: "CHAVE" },
+                { emoji: "🌧️", nome: "CHUVA" },
+                { emoji: "🍫", nome: "CHOCOLATE" },
+                { emoji: "🎩", nome: "CHAPÉU" },
+                { emoji: "🍵", nome: "CHÁ" },
+                { emoji: "🐶", nome: "CACHORRO" },
+                { emoji: "🩴", nome: "CHINELO" },
+                { emoji: "📦", nome: "CAIXA" }
+            ],
+            j: [
+                { emoji: "🐊", nome: "JACARÉ" },
+                { emoji: "🦒", nome: "GIRAFA" },
+                { emoji: "🪟", nome: "JANELA" },
+                { emoji: "🕹️", nome: "JOGO" },
+                { emoji: "📻", nome: "JORNAL" },
+                { emoji: "🍊", nome: "LARANJA" },
+                { emoji: "🧊", nome: "GELO" },
+                { emoji: "🧼", nome: "SABÃO" }
+            ],
+            l: [
+                { emoji: "🦁", nome: "LEÃO" },
+                { emoji: "🌙", nome: "LUA" },
+                { emoji: "✏️", nome: "LÁPIS" },
+                { emoji: "🍊", nome: "LARANJA" },
+                { emoji: "📖", nome: "LIVRO" },
+                { emoji: "🥛", nome: "LEITE" },
+                { emoji: "🐺", nome: "LOBO" },
+                { emoji: "🍋", nome: "LIMÃO" }
+            ],
+            encontros: [
+                { emoji: "🍽️", nome: "PRATO" },
+                { emoji: "🚜", nome: "TRATOR" },
+                { emoji: "🧙‍♀️", nome: "BRUXA" },
+                { emoji: "🌸", nome: "FLOR" },
+                { emoji: "🚲", nome: "BICICLETA" },
+                { emoji: "📘", nome: "BLOCO" },
+                { emoji: "🐉", nome: "DRAGÃO" },
+                { emoji: "❄️", nome: "FLOCO DE NEVE" }
+            ]
+        };
+
+        let fonemaAtual = 'r_vibrante';
+        let alvoAtual = null;
+
+        function selecionarFonema(fonema, elemento) {
+            fonemaAtual = fonema;
+            document.querySelectorAll('.btn-fonema').forEach(btn => btn.classList.remove('ativo'));
+            elemento.classList.add('ativo');
+
+            montarTabuleiro();
+            sortearNovoAlvo();
+        }
+
+        function montarTabuleiro() {
+            const tabuleiro = document.getElementById('tabuleiroLince');
+            tabuleiro.innerHTML = "";
+
+            let listaFiguras = [...bancoFonemas[fonemaAtual]];
+            listaFiguras.sort(() => 0.5 - Math.random());
+
+            listaFiguras.forEach(item => {
+                const carta = document.createElement('div');
+                carta.className = 'carta-lince';
+                carta.onclick = () => verificarEscolha(item);
+
+                carta.innerHTML = `
+                    <span class="emoji">${item.emoji}</span>
+                    <span class="nome">${item.nome}</span>
+                `;
+                tabuleiro.appendChild(carta);
+            });
+        }
+
+        function sortearNovoAlvo() {
+            const lista = bancoFonemas[fonemaAtual];
+            alvoAtual = lista[Math.floor(Math.random() * lista.length)];
+
+            document.getElementById('emojiAlvo').innerText = alvoAtual.emoji;
+            document.getElementById('nomeAlvo').innerText = alvoAtual.nome;
+            document.getElementById('feedback').innerText = "";
+        }
+
+        function verificarEscolha(itemClicado) {
+            const feedback = document.getElementById('feedback');
+
+            if (itemClicado.nome === alvoAtual.nome) {
+                feedback.innerText = "✨ Excelente! Você encontrou a figura!";
+                feedback.className = "mensagem-feedback sucesso";
+                setTimeout(() => {
+                    sortearNovoAlvo();
+                }, 1500);
+            } else {
+                feedback.innerText = "❌ Essa não é a figura sorteada. Procure bem!";
+                feedback.className = "mensagem-feedback erro";
+            }
+        }
+
+        function salvarHistorico() {
+            const nome = document.getElementById('nomePaciente').value.trim();
+            if (!nome) {
+                alert("⚠️ Informe o nome do paciente antes de salvar!");
+                return;
+            }
+
+            const chave = "historico_" + nome.toLowerCase();
+            const historico = JSON.parse(localStorage.getItem(chave)) || [];
+
+            historico.push({
+                jogo: `Caça-Fonemas (Treino de ${fonemaAtual.toUpperCase()})`,
+                sessao: historico.length + 1,
+                pontuacao: "Treino articulatório e discriminativo concluído",
+                data: new Date().toLocaleDateString("pt-BR")
+            });
+
+            localStorage.setItem(chave, JSON.stringify(historico));
+            alert(`✅ Sessão do Caça-Fonemas salva com sucesso no histórico de ${nome}!`);
+        }
+
+        montarTabuleiro();
+        sortearNovoAlvo();
+    </script>
+
+</body>
+
+</html>

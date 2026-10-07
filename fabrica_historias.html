@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fábrica de Histórias - FonoTech</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .grid-palavras {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .card-palavra {
+            background-color: #ffffff;
+            border: 2px dashed #7209b7;
+            border-radius: 12px;
+            padding: 20px 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+        }
+
+        .emoji-palavra {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        .texto-palavra {
+            font-size: 18px;
+            font-weight: bold;
+            color: #7209b7;
+            text-transform: uppercase;
+        }
+
+        .caixa-narrativa {
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div style="display: flex; justify-content: space-between; align-items: center;" class="no-print">
+        <a href="jogos.html">
+            <button type="button">⬅️ Voltar aos Jogos</button>
+        </a>
+        <div style="font-size: 16px; font-weight: bold; color: #7209b7;">
+            História: <span id="numHistoria">1</span> / 5
+        </div>
+    </div>
+
+    <h1>📖 Fábrica de Histórias (Fala Espontânea)</h1>
+    <p>Crie uma história criativa conectando as 3 palavras sorteadas abaixo!</p>
+
+    <div class="card-conteudo">
+
+        <!-- SELEÇÃO DE PACIENTE -->
+        <div id="blocoPaciente" style="margin-bottom: 20px;">
+            <label for="nomePacienteJogo"><strong>Nome do Paciente:</strong></label><br>
+            <input type="text" id="nomePacienteJogo" placeholder="Digite o nome do paciente">
+        </div>
+
+        <!-- ÁREA DO JOGO -->
+        <div id="areaJogo">
+            
+            <div style="text-align: center;">
+                <button type="button" onclick="sortearPalavras()" style="background-color: #7209b7; font-size: 16px; padding: 12px 25px;">
+                    🎲 Sortear Novas Palavras
+                </button>
+            </div>
+
+            <!-- CARDS COM AS 3 PALAVRAS SORTEADAS -->
+            <div class="grid-palavras">
+                <div class="card-palavra">
+                    <div id="emoji1" class="emoji-palavra">❓</div>
+                    <div id="palavra1" class="texto-palavra">Palavra 1</div>
+                </div>
+                <div class="card-palavra">
+                    <div id="emoji2" class="emoji-palavra">❓</div>
+                    <div id="palavra2" class="texto-palavra">Palavra 2</div>
+                </div>
+                <div class="card-palavra">
+                    <div id="emoji3" class="emoji-palavra">❓</div>
+                    <div id="palavra3" class="texto-palavra">Palavra 3</div>
+                </div>
+            </div>
+
+            <!-- ANOTAÇÕES DO FONOAUDIÓLOGO / REGISTRO DA NARRATIVA -->
+            <div class="caixa-narrativa">
+                <label for="anotacaoNarrativa"><strong>Anotações da Fala Espontânea / Discurso do Paciente:</strong></label><br>
+                <textarea id="anotacaoNarrativa" rows="3" style="width: 100%; max-width: 100%; margin-top: 8px;" placeholder="Registre elementos da narrativa (coesão, coerência, trocas fonológicas, fluência)..."></textarea>
+            </div>
+
+            <br>
+            <div style="text-align: right;">
+                <button type="button" onclick="proximaHistoria()" style="background-color: #0a9396; font-size: 16px;">
+                    ➡️ Registrar e Próxima História
+                </button>
+            </div>
+
+        </div>
+
+        <!-- TELA DE FINALIZAÇÃO -->
+        <div id="telaFinal" style="display: none; text-align: center; padding: 20px;">
+            <h2 style="color: #7209b7;">🎉 Atividade de Fala Espontânea Concluída!</h2>
+            <p id="resultadoTexto" style="font-size: 18px; font-weight: bold; margin: 20px 0;"></p>
+            <button type="button" onclick="reiniciarJogo()" style="background-color: #7209b7;">🔄 Nova Sessão de Histórias</button>
+        </div>
+
+    </div>
+
+    <script>
+        // BANCO DE PALAVRAS DIVERSAS PARA SORTEIO
+        const bancoPalavras = [
+            { palavra: "CACHORRO", emoji: "🐶" },
+            { palavra: "FOGUETE", emoji: "🚀" },
+            { palavra: "SORVETE", emoji: "🍦" },
+            { palavra: "PISCINA", emoji: "🏊" },
+            { palavra: "DRAGÃO", emoji: "🐉" },
+            { palavra: "CHAVE", emoji: "🔑" },
+            { palavra: "TESOURO", emoji: "🏴‍☠️" },
+            { palavra: "FLORESTA", emoji: "🌲" },
+            { palavra: "ROBÔ", emoji: "🤖" },
+            { palavra: "MAGIA", emoji: "🪄" },
+            { palavra: "RELÓGIO", emoji: "⏰" },
+            { palavra: "REI", emoji: "👑" },
+            { palavra: "ESPAÇO", emoji: "🌌" },
+            { palavra: "DINOSSAURO", emoji: "🦖" },
+            { palavra: "BANANA", emoji: "🍌" },
+            { palavra: "FESTA", emoji: "🎉" },
+            { palavra: "ILHA", emoji: "🏝️" },
+            { palavra: "MÚSICA", emoji: "🎵" },
+            { palavra: "FANTASMA", emoji: "👻" },
+            { palavra: "SUPER-HERÓI", emoji: "🦸" },
+            { palavra: "ESTRELA", emoji: "⭐" },
+            { palavra: "LIVRO", emoji: "📚" },
+            { palavra: "CASTELO", emoji: "🏰" }
+        ];
+
+        let historiaAtual = 1;
+        let totalHistoriasValidadas = 0;
+        let palavrasRodadaAtual = [];
+
+        document.addEventListener("DOMContentLoaded", sortearPalavras);
+
+        function sortearPalavras() {
+            let embaralhado = [...bancoPalavras].sort(() => Math.random() - 0.5);
+            palavrasRodadaAtual = embaralhado.slice(0, 3);
+
+            document.getElementById("emoji1").innerText = palavrasRodadaAtual[0].emoji;
+            document.getElementById("palavra1").innerText = palavrasRodadaAtual[0].palavra;
+
+            document.getElementById("emoji2").innerText = palavrasRodadaAtual[1].emoji;
+            document.getElementById("palavra2").innerText = palavrasRodadaAtual[1].palavra;
+
+            document.getElementById("emoji3").innerText = palavrasRodadaAtual[2].emoji;
+            document.getElementById("palavra3").innerText = palavrasRodadaAtual[2].palavra;
+
+            document.getElementById("anotacaoNarrativa").value = "";
+        }
+
+        function proximaHistoria() {
+            totalHistoriasValidadas++;
+            
+            if (historiaAtual >= 5) {
+                finalizarAtividade();
+                return;
+            }
+
+            historiaAtual++;
+            document.getElementById("numHistoria").innerText = historiaAtual;
+            sortearPalavras();
+        }
+
+        function finalizarAtividade() {
+            document.getElementById("areaJogo").style.display = "none";
+            document.getElementById("telaFinal").style.display = "block";
+
+            let nome = document.getElementById("nomePacienteJogo").value.trim() || "Paciente Não Identificado";
+            document.getElementById("resultadoTexto").innerText = `${nome} concluiu a criação de 5 histórias espontâneas!`;
+
+            if (nome !== "Paciente Não Identificado") {
+                let chave = "historico_" + nome.toLowerCase();
+                let historico = JSON.parse(localStorage.getItem(chave)) || [];
+                
+                historico.push({
+                    jogo: "Fábrica de Histórias (Fala Espontânea)",
+                    sessao: historico.length + 1,
+                    pontuacao: `5 histórias criadas`,
+                    data: new Date().toLocaleDateString("pt-BR")
+                });
+
+                localStorage.setItem(chave, JSON.stringify(historico));
+            }
+        }
+
+        function reiniciarJogo() {
+            historiaAtual = 1;
+            totalHistoriasValidadas = 0;
+            document.getElementById("numHistoria").innerText = "1";
+            document.getElementById("areaJogo").style.display = "block";
+            document.getElementById("telaFinal").style.display = "none";
+            sortearPalavras();
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Formando Frases - FonoTech</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .caixa-construcao {
+            min-height: 80px;
+            background-color: #f1f8f9;
+            border: 2px dashed #0a9396;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .bloco-palavra {
+            background-color: #005f73;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s ease;
+        }
+
+        .bloco-palavra:active {
+            transform: scale(0.95);
+        }
+
+        .bloco-disponivel {
+            background-color: #0a9396;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div style="display: flex; justify-content: space-between; align-items: center;" class="no-print">
+        <a href="jogos.html">
+            <button type="button">⬅️ Voltar aos Jogos</button>
+        </a>
+        <div style="font-size: 16px; font-weight: bold; color: #005f73;">
+            Concluídas: <span id="pontos">0</span> / 8
+        </div>
+    </div>
+
+    <h1>🧩 Formando Frases (Linguagem Escrita)</h1>
+    <p>Ordene os blocos de palavras para formar a frase correta de leitura.</p>
+
+    <div class="card-conteudo">
+        <!-- SELEÇÃO DE PACIENTE -->
+        <div id="blocoPaciente" style="margin-bottom: 20px;">
+            <label for="nomePacienteJogo"><strong>Nome do Paciente:</strong></label><br>
+            <input type="text" id="nomePacienteJogo" placeholder="Digite o nome do paciente">
+        </div>
+
+        <div id="areaJogo">
+            <h3 id="numeroRodada" style="color: #005f73;">Frase 1 de 8</h3>
+            <p style="font-size: 14px; color: #666;">Clique nas palavras abaixo para montá-las no quadro em ordem:</p>
+
+            <!-- SUAS PALAVRAS SELECIONADAS -->
+            <label><strong>Sua Frase Montada:</strong></label>
+            <div id="quadroConstrucao" class="caixa-construcao">
+                <!-- Palavras montadas entram aqui -->
+            </div>
+
+            <!-- BANCO DE PALAVRAS EMBARALHADAS -->
+            <label><strong>Palavras Disponíveis:</strong></label>
+            <div id="quadroDisponivel" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px;">
+                <!-- Palavras para escolha entram aqui -->
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="limparFrase()" style="background-color: #ee9b00;">🔄 Limpar Frase</button>
+                <button type="button" onclick="validarFrase()" style="background-color: #28a745; font-weight: bold;">✅ Verificar Frase</button>
+            </div>
+        </div>
+
+        <!-- TELA DE FINALIZAÇÃO -->
+        <div id="telaFinal" style="display: none; text-align: center; padding: 20px;">
+            <h2 style="color: #0a9396;">🎉 Excelente Trabalho de Leitura e Escrita!</h2>
+            <p id="resultadoTexto" style="font-size: 18px; font-weight: bold; margin: 20px 0;"></p>
+            <button type="button" onclick="reiniciarJogo()" style="background-color: #005f73;">🔄 Reiniciar Atividade</button>
+        </div>
+    </div>
+
+    <script>
+        const listaFrases = [
+            "O MENINO BEBE LEITE QUENTE",
+            "A MENINA JOGA BOLA NO JARDIM",
+            "O GATO SUBIU NO TELHADO ALTO",
+            "O SOL ILUMINA O DIA DE HOJE",
+            "A PROFESSORA LEU UM LIVRO NOVO",
+            "O CACHORRO LATIU PARA O PASSARO",
+            "ELES COMERAM PIZZA DE QUEIJO",
+            "EU GOSTO DE DESENHAR E PINATAR"
+        ];
+
+        let indiceAtual = 0;
+        let fraseMontada = [];
+        let palavrasOriginais = [];
+        let acertos = 0;
+
+        document.addEventListener("DOMContentLoaded", carregarFrase);
+
+        function embaralhar(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function carregarFrase() {
+            if (indiceAtual >= listaFrases.length) {
+                finalizarJogo();
+                return;
+            }
+
+            document.getElementById("numeroRodada").innerText = `Frase ${indiceAtual + 1} de 8`;
+            fraseMontada = [];
+            
+            let fraseAlvo = listaFrases[indiceAtual];
+            palavrasOriginais = fraseAlvo.split(" ");
+            let palavrasEmbaralhadar = embaralhar([...palavrasOriginais]);
+
+            atualizarQuadros(palavrasEmbaralhadar);
+        }
+
+        function atualizarQuadros(disponiveis) {
+            let qConstrucao = document.getElementById("quadroConstrucao");
+            let qDisponivel = document.getElementById("quadroDisponivel");
+
+            qConstrucao.innerHTML = "";
+            qDisponivel.innerHTML = "";
+
+            // Renderiza selecionadas
+            fraseMontada.forEach((p, idx) => {
+                let div = document.createElement("div");
+                div.className = "bloco-palavra";
+                div.innerText = p;
+                div.onclick = function() {
+                    fraseMontada.splice(idx, 1);
+                    disponiveis.push(p);
+                    atualizarQuadros(disponiveis);
+                };
+                qConstrucao.appendChild(div);
+            });
+
+            // Renderiza disponíveis
+            disponiveis.forEach((p, idx) => {
+                let div = document.createElement("div");
+                div.className = "bloco-palavra bloco-disponivel";
+                div.innerText = p;
+                div.onclick = function() {
+                    fraseMontada.push(p);
+                    disponiveis.splice(idx, 1);
+                    atualizarQuadros(disponiveis);
+                };
+                qDisponivel.appendChild(div);
+            });
+        }
+
+        function limparFrase() {
+            carregarFrase();
+        }
+
+        function validarFrase() {
+            let textoMontado = fraseMontada.join(" ");
+            let textoAlvo = listaFrases[indiceAtual];
+
+            if (textoMontado === textoAlvo) {
+                acertos++;
+                document.getElementById("pontos").innerText = acertos;
+                alert("✨ Perfeito! Frase estruturada corretamente.");
+                indiceAtual++;
+                carregarFrase();
+            } else {
+                alert("❌ A ordem das palavras não está correta. Tente organizar novamente!");
+            }
+        }
+
+        function finalizarJogo() {
+            document.getElementById("areaJogo").style.display = "none";
+            document.getElementById("telaFinal").style.display = "block";
+
+            let nome = document.getElementById("nomePacienteJogo").value.trim() || "Paciente Não Identificado";
+            document.getElementById("resultadoTexto").innerText = `${nome} concluiu a estruturação de todas as 8 frases!`;
+
+            if (nome !== "Paciente Não Identificado") {
+                let chave = "historico_" + nome.toLowerCase();
+                let historico = JSON.parse(localStorage.getItem(chave)) || [];
+                
+                historico.push({
+                    jogo: "Formando Frases (Linguagem Escrita)",
+                    sessao: historico.length + 1,
+                    pontuacao: `${acertos} de 8`,
+                    data: new Date().toLocaleDateString("pt-BR")
+                });
+
+                localStorage.setItem(chave, JSON.stringify(historico));
+            }
+        }
+
+        function reiniciarJogo() {
+            indiceAtual = 0;
+            acertos = 0;
+            document.getElementById("pontos").innerText = "0";
+            document.getElementById("areaJogo").style.display = "block";
+            document.getElementById("telaFinal").style.display = "none";
+            carregarFrase();
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Modo Difícil: Conversa Real - FonoTech</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        h1 { color: #1e293b; margin-bottom: 5px; font-size: 24px; }
+        p.sub { color: #64748b; margin-bottom: 25px; font-size: 14px; }
+        .form-identificacao { margin: 20px 0; padding: 20px; background: #f1f5f9; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .form-identificacao input { padding: 10px; font-size: 15px; width: 80%; max-width: 350px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 8px; outline: none; }
+        .btn-iniciar { background-color: #1d4ed8; color: white; border: none; padding: 10px 25px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; display: block; margin-left: auto; margin-right: auto; }
+        .jogo-area { display: none; }
+        .dialogo-box { background: #f1f5f9; padding: 20px; border-radius: 8px; font-size: 18px; font-weight: bold; margin-bottom: 20px; }
+        .escolhas-container { display: flex; flex-direction: column; gap: 10px; }
+        .btn-escolha { background: #f3e8ff; color: #5b21b6; border: 1px solid #d8b4fe; padding: 15px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: left; }
+        .btn-escolha:hover { background: #ede9fe; }
+        .voltar-link { display: inline-block; margin-top: 30px; text-decoration: none; color: #64748b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Modo Difícil: Conversa Real</h1>
+        <p class="sub">Pragmática e navegação de pistas sociais</p>
+        <div id="telaIdentificacao" class="form-identificacao">
+            <label style="font-weight: bold; display: block;">Nome do Paciente:</label>
+            <input type="text" id="nomePaciente" placeholder="Nome completo...">
+            <button type="button" class="btn-iniciar" onclick="iniciar()">Iniciar 🚀</button>
+        </div>
+        <div id="telaJogo" class="jogo-area">
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 10px;">Paciente: <strong id="exibirNome"></strong></div>
+            <div class="dialogo-box" id="textoDialogo"></div>
+            <div class="escolhas-container" id="escolhasContainer"></div>
+            <div id="feedback" style="margin-top: 15px; font-weight: bold;"></div>
+        </div>
+        <a href="index.html" class="voltar-link">⬅️ Voltar para a Pasta de Jogos</a>
+    </div>
+    <script>
+        const sessoes = [
+            { fala: "Colega: 'Nossa, mas que terno lindo... para quem vai a uma festa dos anos 80!'", ops: [ { txt: "Ficar bravo e ofender o colega", ok: false }, { txt: "Compreender a ironia/sarcasmo e rir junto", ok: true } ] },
+            { fala: "Amigo: 'Adorei a tua ajuda com o trabalho, demoraste apenas três horas para fazer algo de dois minutos!'", ops: [ { txt: "Agradecer seriamente como se fosse um elogio", ok: false }, { txt: "Reconhecer a brincadeira e pedir desculpa pela demora", ok: true } ] }
+        ];
+        let idx = 0;
+        function iniciar() {
+            let nome = document.getElementById('nomePaciente').value;
+            if(!nome) return alert('Digite o nome');
+            document.getElementById('exibirNome').innerText = nome;
+            document.getElementById('telaIdentificacao').style.display = 'none';
+            document.getElementById('telaJogo').style.display = 'block';
+            carregar();
+        }
+        function carregar() {
+            if(idx >= sessoes.length) {
+                document.getElementById('telaJogo').innerHTML = "<h1>🎉 Parabéns!</h1><p>Missões pragmáticas concluídas.</p>";
+                return;
+            }
+            let s = sessoes[idx];
+            document.getElementById('textoDialogo').innerText = s.fala;
+            document.getElementById('feedback').innerText = "";
+            let cont = document.getElementById('escolhasContainer');
+            cont.innerHTML = '';
+            s.ops.forEach(o => {
+                let btn = document.createElement('button');
+                btn.className = 'btn-escolha';
+                btn.innerText = o.txt;
+                btn.onclick = () => {
+                    if(o.ok) {
+                        document.getElementById('feedback').style.color = '#16a34a';
+                        document.getElementById('feedback').innerText = "✨ Excelente escolha social!";
+                        idx++;
+                        setTimeout(carregar, 1500);
+                    } else {
+                        document.getElementById('feedback').style.color = '#dc2626';
+                        document.getElementById('feedback').innerText = "❌ Essa resposta pode gerar mal-entendidos. Tente outra.";
+                    }
+                };
+                cont.appendChild(btn);
+            });
+        }
+    </script>
+</body>
+</html>

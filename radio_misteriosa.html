@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Rádio Misteriosa - FonoTech</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        h1 { color: #1e293b; margin-bottom: 5px; font-size: 24px; }
+        p.sub { color: #64748b; margin-bottom: 25px; font-size: 14px; }
+        .form-identificacao { margin: 20px 0; padding: 20px; background: #f1f5f9; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .form-identificacao input { padding: 10px; font-size: 15px; width: 80%; max-width: 350px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 8px; outline: none; }
+        .btn-iniciar { background-color: #1d4ed8; color: white; border: none; padding: 10px 25px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; display: block; margin-left: auto; margin-right: auto; }
+        .jogo-area { display: none; }
+        .som-icone { font-size: 60px; margin: 15px 0; }
+        .opcoes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .btn-opcao { background-color: #f3e8ff; color: #5b21b6; border: 1px solid #d8b4fe; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .btn-opcao:hover { background-color: #ede9fe; }
+        .voltar-link { display: inline-block; margin-top: 30px; text-decoration: none; color: #64748b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📻 Rádio Misteriosa</h1>
+        <p class="sub">Compreensão auditiva e inferência de ambientes</p>
+        <div id="telaIdentificacao" class="form-identificacao">
+            <label style="font-weight: bold; display: block;">Nome do Paciente:</label>
+            <input type="text" id="nomePaciente" placeholder="Nome completo...">
+            <button type="button" class="btn-iniciar" onclick="iniciar()">Iniciar 🚀</button>
+        </div>
+        <div id="telaJogo" class="jogo-area">
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 10px;">Paciente: <strong id="exibirNome"></strong></div>
+            <div>Caso <span id="numCaso">1</span> de 5</div>
+            <div class="som-icone" id="iconeSom">🔊</div>
+            <div style="font-size: 18px; font-weight: bold; margin: 15px 0;" id="perguntaTexto"></div>
+            <div class="opcoes-grid" id="opcoesGrid"></div>
+            <div id="feedback" style="margin-top: 15px; font-weight: bold;"></div>
+        </div>
+        <a href="index.html" class="voltar-link">⬅️ Voltar para a Pasta de Jogos</a>
+    </div>
+    <script>
+        const casos = [
+            { icone: "🍳", som: "Barulho de fritura, talheres e água correndo", pergunta: "Onde se passa esta cena?", correta: "Cozinha", ops: ["Cozinha", "Praia", "Trânsito", "Parque"] },
+            { icone: "🌊", som: "Barulho de ondas quebrando e gaivotas", pergunta: "Onde se passa esta cena?", correta: "Praia", ops: ["Escola", "Praia", "Hospital", "Biblioteca"] },
+            { icone: "🚗", som: "Buzinas, motores acelerando e sirenes distantes", pergunta: "Onde se passa esta cena?", correta: "Trânsito urbano", ops: ["Trânsito urbano", "Fazenda", "Floresta", "Cinema"] },
+            { icone: "🌧️", som: "Pingo de chuva forte batendo na janela e trovões", pergunta: "O que está a acontecer no ambiente?", correta: "Uma tempestade", ops: ["Uma festa", "Uma tempestade", "Um jogo de futebol", "Uma aula de natação"] },
+            { icone: "🛎️", som: "Sons de passos ecoando, sussurros e páginas virando", pergunta: "Onde se passa esta cena?", correta: "Biblioteca", ops: ["Ginásio", "Biblioteca", "Restaurante lotado", "Feira livre"] }
+        ];
+        let idx = 0;
+        function iniciar() {
+            let nome = document.getElementById('nomePaciente').value;
+            if(!nome) return alert('Digite o nome');
+            document.getElementById('exibirNome').innerText = nome;
+            document.getElementById('telaIdentificacao').style.display = 'none';
+            document.getElementById('telaJogo').style.display = 'block';
+            carregar();
+        }
+        function carregar() {
+            if(idx >= casos.length) {
+                document.getElementById('telaJogo').innerHTML = "<h1>🎉 Fim da Atividade!</h1><p>Excelente desempenho auditivo.</p>";
+                return;
+            }
+            let c = casos[idx];
+            document.getElementById('numCaso').innerText = idx + 1;
+            document.getElementById('iconeSom').innerText = c.icone;
+            document.getElementById('perguntaTexto').innerText = `Ouve-se: "${c.som}".\n${c.pergunta}`;
+            let grid = document.getElementById('opcoesGrid');
+            grid.innerHTML = '';
+            let ops = [...c.ops].sort(() => Math.random() - 0.5);
+            ops.forEach(o => {
+                let btn = document.createElement('button');
+                btn.className = 'btn-opcao';
+                btn.innerText = o;
+                btn.onclick = () => {
+                    if(o === c.correta) {
+                        document.getElementById('feedback').style.color = '#16a34a';
+                        document.getElementById('feedback').innerText = "✨ Correto!";
+                        idx++;
+                        setTimeout(carregar, 1200);
+                    } else {
+                        document.getElementById('feedback').style.color = '#dc2626';
+                        document.getElementById('feedback').innerText = "❌ Incorreto, tente outra opção.";
+                    }
+                };
+                grid.appendChild(btn);
+            });
+        }
+    </script>
+</body>
+</html>

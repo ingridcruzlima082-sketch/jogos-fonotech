@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Decodificação - FonoTech</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .painel-pergunta {
+            background-color: #ffffff;
+            border: 2px solid #4361ee;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 650px;
+            margin: 20px auto;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .letra-destaque {
+            font-size: 90px;
+            font-weight: 800;
+            color: #4361ee;
+            margin: 5px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .grid-alternativas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .card-resposta {
+            background-color: #ffffff;
+            border: 2px solid #4361ee;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .card-resposta:hover {
+            background-color: #eef2ff;
+            transform: scale(1.04);
+        }
+
+        .card-resposta div {
+            font-size: 55px;
+        }
+
+        .card-resposta p {
+            font-size: 15px;
+            font-weight: bold;
+            color: #3f37c9;
+            margin: 5px 0 0 0;
+        }
+
+        .painel-sessao-destaque {
+            background-color: #fff3bf;
+            border: 1px solid #ffe066;
+            border-radius: 8px;
+            padding: 10px 15px;
+            display: inline-block;
+            margin-top: 10px;
+            color: #856404;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="no-print" style="display: flex; justify-content: space-between; align-items: center;">
+        <a href="jogos.html">
+            <button type="button">⬅️ Voltar aos Jogos</button>
+        </a>
+    </div>
+
+    <h1 style="text-align: center; color: #4361ee;">📖 Jogo de Decodificação Leitora</h1>
+    <p style="text-align: center;">Observe a letra em destaque e escolha a figura que começa com o som dessa letra!</p>
+
+    <!-- IDENTIFICAÇÃO DO PACIENTE E PAINEL DE SESSÕES -->
+    <div style="text-align: center; margin-bottom: 20px;" class="no-print">
+        <label for="pacienteJogo"><strong>Paciente:</strong></label>
+        <input type="text" id="pacienteJogo" placeholder="Digite o nome do paciente" style="width: 250px; display: inline-block;" oninput="verificarSessoesAnteriores()">
+        <button onclick="iniciarPartida()" style="background-color: #4361ee;">🚀 Iniciar Partida (12 Questões)</button>
+
+        <br>
+        <div id="painelInfoSessao" class="painel-sessao-destaque" style="display: none;"></div>
+    </div>
+
+    <!-- ÁREA DO JOGO -->
+    <div id="areaJogo" style="display: none;">
+
+        <div style="display: flex; justify-content: space-around; align-items: center; max-width: 650px; margin: 0 auto;">
+            <div>
+                <h3>🎯 Questão: <span id="numeroRodada" style="color: #4361ee;">1</span>/12</h3>
+            </div>
+            <div>
+                <h3>🏆 Acertos: <span id="contadorAcertos" style="color: #2a9d8f;">0</span></h3>
+            </div>
+        </div>
+
+        <!-- PAINEL DA LETRA DESTACADA -->
+        <div class="painel-pergunta">
+            <p style="margin: 0; font-size: 14px; font-weight: bold; color: #555;">QUAL FIGURA COMEÇA COM A LETRA:</p>
+            <div id="letraAlvo" class="letra-destaque">A</div>
+        </div>
+
+        <p style="text-align: center; font-weight: bold; color: #333;">Clique na opção correta abaixo:</p>
+
+        <!-- OPÇÕES DE FIGURAS -->
+        <div class="grid-alternativas" id="containerAlternativas"></div>
+    </div>
+
+    <script>
+        const nomeDoJogoAtual = "Decodificação";
+
+        // BANCO DE 12 QUESTÕES DE DECODIFICAÇÃO (LETRA -> FIGURA)
+        const questoes = [
+            { letra: "A", opcoes: [{ emoji: "✈️", palavra: "AVIÃO", correta: true }, { emoji: "🐶", palavra: "CACHORRO", correta: false }, { emoji: "⚽", palavra: "BOLA", correta: false }] },
+            { letra: "B", opcoes: [{ emoji: "🐱", palavra: "GATO", correta: false }, { emoji: "🍌", palavra: "BANANA", correta: true }, { emoji: "☀️", palavra: "SOL", correta: false }] },
+            { letra: "C", opcoes: [{ emoji: "🚗", palavra: "CARRO", correta: true }, { emoji: "🦁", palavra: "LEÃO", correta: false }, { emoji: "🍇", palavra: "UVA", correta: false }] },
+            { letra: "D", opcoes: [{ emoji: "🎲", palavra: "DADO", correta: true }, { emoji: "🐸", palavra: "SAPO", correta: false }, { emoji: "🔑", palavra: "CHAVE", correta: false }] },
+            { letra: "F", opcoes: [{ emoji: "🔥", palavra: "FOGO", correta: true }, { emoji: "🍎", palavra: "MAÇÃ", correta: false }, { emoji: "🚗", palavra: "CARRO", correta: false }] },
+            { letra: "G", opcoes: [{ emoji: "🐱", palavra: "GATO", correta: true }, { emoji: "✈️", palavra: "AVIÃO", correta: false }, { emoji: "🍌", palavra: "BANANA", correta: false }] },
+            { letra: "L", opcoes: [{ emoji: "🦁", palavra: "LEÃO", correta: true }, { emoji: "🐶", palavra: "CACHORRO", correta: false }, { emoji: "☀️", palavra: "SOL", correta: false }] },
+            { letra: "M", opcoes: [{ emoji: "🍎", palavra: "MAÇÃ", correta: true }, { emoji: "🔑", palavra: "CHAVE", correta: false }, { emoji: "🐸", palavra: "SAPO", correta: false }] },
+            { letra: "P", opcoes: [{ emoji: "🐸", palavra: "SAPO", correta: false }, { emoji: "🔑", palavra: "CHAVE", correta: false }, { emoji: "🐟", palavra: "PEIXE", correta: true }] },
+            { letra: "R", opcoes: [{ emoji: "🐭", palavra: "RATO", correta: true }, { emoji: "🚗", palavra: "CARRO", correta: false }, { emoji: "⚽", palavra: "BOLA", correta: false }] },
+            { letra: "S", opcoes: [{ emoji: "🐸", palavra: "SAPO", correta: true }, { emoji: "🍎", palavra: "MAÇÃ", correta: false }, { emoji: "🧃", palavra: "SUCO", correta: false }] },
+            { letra: "V", opcoes: [{ emoji: "🐄", palavra: "VACA", correta: true }, { emoji: "🦁", palavra: "LEÃO", correta: false }, { emoji: "🐱", palavra: "GATO", correta: false }] }
+        ];
+
+        let acertos = 0;
+        let rodadaAtual = 0;
+        const totalRodadas = 12;
+        let numeroProximaSessao = 1;
+
+        function verificarSessoesAnteriores() {
+            let nome = document.getElementById("pacienteJogo").value.trim();
+            let painel = document.getElementById("painelInfoSessao");
+
+            if (nome === "") {
+                painel.style.display = "none";
+                return;
+            }
+
+            let chave = "historico_" + nome.toLowerCase();
+            let historicoGeral = JSON.parse(localStorage.getItem(chave)) || [];
+            let historicoDoJogo = historicoGeral.filter(r => r.jogo === nomeDoJogoAtual);
+            
+            numeroProximaSessao = historicoDoJogo.length + 1;
+
+            painel.style.display = "inline-block";
+            if (historicoDoJogo.length === 0) {
+                painel.innerHTML = "📌 Primeira sessão de <strong>" + nomeDoJogoAtual + "</strong> para " + nome + "!";
+            } else {
+                painel.innerHTML = "📊 <strong>" + nome + "</strong> já realizou " + historicoDoJogo.length + " sessão(ões) de <strong>" + nomeDoJogoAtual + "</strong>. Iniciando a <strong>Sessão Nº " + numeroProximaSessao + "</strong>!";
+            }
+        }
+
+        function iniciarPartida() {
+            let nome = document.getElementById("pacienteJogo").value.trim();
+            if (nome === "") {
+                alert("Por favor, digite o nome do paciente antes de iniciar.");
+                return;
+            }
+
+            verificarSessoesAnteriores();
+
+            acertos = 0;
+            rodadaAtual = 0;
+            document.getElementById("contadorAcertos").innerText = acertos;
+            document.getElementById("areaJogo").style.display = "block";
+
+            proximaRodada();
+        }
+
+        function proximaRodada() {
+            rodadaAtual++;
+
+            if (rodadaAtual > totalRodadas) {
+                finalizarSessao();
+                return;
+            }
+
+            document.getElementById("numeroRodada").innerText = rodadaAtual;
+
+            let q = questoes[rodadaAtual - 1];
+            document.getElementById("letraAlvo").innerText = q.letra;
+
+            let container = document.getElementById("containerAlternativas");
+            container.innerHTML = "";
+
+            let opcoesEmbaralhadas = [...q.opcoes].sort(() => 0.5 - Math.random());
+
+            opcoesEmbaralhadas.forEach(op => {
+                let card = document.createElement("div");
+                card.className = "card-resposta";
+                card.innerHTML = `
+                    <div>${op.emoji}</div>
+                    <p>${op.palavra}</p>
+                `;
+                card.onclick = () => verificarEscolha(op.correta);
+                container.appendChild(card);
+            });
+        }
+
+        function verificarEscolha(isCorreta) {
+            if (isCorreta) {
+                acertos++;
+                document.getElementById("contadorAcertos").innerText = acertos;
+                alert("✨ Muito bem! Correspondência letra-som correta!");
+            } else {
+                alert("❌ Ops! Essa figura não começa com a letra indicada.");
+            }
+
+            proximaRodada();
+        }
+
+        function finalizarSessao() {
+            let nome = document.getElementById("pacienteJogo").value.trim();
+            let chave = "historico_" + nome.toLowerCase();
+
+            let historicoGeral = JSON.parse(localStorage.getItem(chave)) || [];
+
+            historicoGeral.push({
+                sessao: numeroProximaSessao,
+                jogo: nomeDoJogoAtual,
+                pontuacao: acertos + " de " + totalRodadas,
+                data: new Date().toLocaleDateString("pt-BR")
+            });
+
+            localStorage.setItem(chave, JSON.stringify(historicoGeral));
+
+            alert("🎉 Fim de jogo!\n\nPaciente: " + nome + "\nHabilidade: " + nomeDoJogoAtual + "\nSessão: Nº " + numeroProximaSessao + "\nPontuação Final: " + acertos + " acertos em 12 questões.");
+            
+            verificarSessoesAnteriores();
+            document.getElementById("areaJogo").style.display = "none";
+        }
+    </script>
+
+</body>
+
+</html>

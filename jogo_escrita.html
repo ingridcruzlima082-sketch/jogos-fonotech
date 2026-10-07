@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Formação de Palavras - FonoTech</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        h1 { color: #1e293b; margin-bottom: 5px; font-size: 24px; }
+        p.sub { color: #64748b; margin-bottom: 25px; font-size: 14px; }
+        .form-identificacao {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+        }
+        .form-identificacao input {
+            padding: 10px;
+            font-size: 15px;
+            width: 80%;
+            max-width: 350px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            margin-top: 8px;
+            outline: none;
+        }
+        .btn-iniciar {
+            background-color: #1d4ed8;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .btn-iniciar:hover { background-color: #1e40af; }
+        .jogo-area { display: none; }
+        .figura-box {
+            font-size: 80px;
+            margin: 15px 0;
+        }
+        .palavra-display {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 25px 0;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .letra-caixa {
+            background: #f1f5f9;
+            border: 2px solid #cbd5e1;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: #1e293b;
+        }
+        .letra-faltando {
+            background: #fef08a;
+            border: 2px dashed #ca8a04;
+            color: #ca8a04;
+        }
+        .teclado-letras {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .btn-letra {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-letra:hover { background-color: #1d4ed8; }
+        .mensagem {
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 20px;
+            min-height: 24px;
+        }
+        .voltar-link {
+            display: inline-block;
+            margin-top: 30px;
+            text-decoration: none;
+            color: #64748b;
+            font-weight: bold;
+        }
+        .voltar-link:hover { color: #1e293b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✏️ Complete a Palavra</h1>
+        <p class="sub">Atividade de Linguagem Escrita e Consciência Fonológica</p>
+
+        <!-- TELA DE IDENTIFICAÇÃO -->
+        <div id="telaIdentificacao" class="form-identificacao">
+            <label for="nomePaciente" style="font-weight: bold; color: #1e293b; display: block;">Nome do Paciente:</label>
+            <input type="text" id="nomePaciente" placeholder="Digite o nome completo do paciente...">
+            <button type="button" class="btn-iniciar" onclick="iniciarAtividade()">Iniciar Atividade 🚀</button>
+        </div>
+
+        <!-- ÁREA DO JOGO (OCULTA ATÉ PREENCHER O NOME) -->
+        <div id="telaJogo" class="jogo-area">
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Paciente: <strong id="exibirNome" style="color: #1e293b;"></strong></div>
+            <div>Desafio <span id="numDesafio">1</span> de 15</div>
+            <div class="figura-box" id="emojiFigura">🐶</div>
+            
+            <div class="palavra-display" id="palavraDisplay"></div>
+
+            <p>Escolha a letra correta:</p>
+            <div class="teclado-letras" id="tecladoLetras"></div>
+
+            <div class="mensagem" id="mensagemFeedback"></div>
+        </div>
+
+        <div>
+            <a href="index.html" class="voltar-link">⬅️ Voltar para a Pasta de Jogos</a>
+        </div>
+    </div>
+
+    <script>
+        const listaDesafios = [
+            { palavra: "PATO", dica: "🦆", indiceOculto: 0, letraFaltando: "P", opcoes: ["P", "B", "T"] },
+            { palavra: "BOLA", dica: "⚽", indiceOculto: 0, letraFaltando: "B", opcoes: ["V", "B", "P"] },
+            { palavra: "SAPO", dica: "🐸", indiceOculto: 2, letraFaltando: "P", opcoes: ["T", "P", "S"] },
+            { palavra: "CASA", dica: "🏠", indiceOculto: 1, letraFaltando: "A", opcoes: ["O", "A", "E"] },
+            { palavra: "GATO", dica: "🐱", indiceOculto: 3, letraFaltando: "O", opcoes: ["A", "U", "O"] },
+            { palavra: "FACA", dica: "🔪", indiceOculto: 0, letraFaltando: "F", opcoes: ["V", "F", "S"] },
+            { palavra: "VACA", dica: "🐮", indiceOculto: 0, letraFaltando: "V", opcoes: ["F", "V", "B"] },
+            { palavra: "LUA", dica: "🌙", indiceOculto: 1, letraFaltando: "U", opcoes: ["O", "U", "A"] },
+            { palavra: "SOL", dica: "☀️", indiceOculto: 2, letraFaltando: "L", opcoes: ["R", "L", "M"] },
+            { palavra: "BATO", dica: "🥊", indiceOculto: 1, letraFaltando: "A", opcoes: ["E", "A", "O"] },
+            { palavra: "TATO", dica: "🖐️", indiceOculto: 0, letraFaltando: "T", opcoes: ["D", "T", "P"] },
+            { palavra: "DIA", dica: "📅", indiceOculto: 0, letraFaltando: "D", opcoes: ["T", "D", "B"] },
+            { palavra: "MESA", dica: "🪑", indiceOculto: 2, letraFaltando: "S", opcoes: ["Z", "S", "X"] },
+            { palavra: "ROSA", dica: "🌹", indiceOculto: 1, letraFaltando: "O", opcoes: ["A", "O", "U"] },
+            { palavra: "BOTA", dica: "👢", indiceOculto: 3, letraFaltando: "A", opcoes: ["O", "A", "E"] }
+        ];
+
+        let atualIndex = 0;
+
+        function iniciarAtividade() {
+            const nome = document.getElementById('nomePaciente').value.trim();
+            if (!nome) {
+                alert("Por favor, digite o nome do paciente antes de iniciar.");
+                return;
+            }
+            document.getElementById('exibirNome').innerText = nome;
+            document.getElementById('telaIdentificacao').style.display = 'none';
+            document.getElementById('telaJogo').style.display = 'block';
+            carregarPalavra();
+        }
+
+        function carregarPalavra() {
+            if (atualIndex >= listaDesafios.length) {
+                document.getElementById('telaJogo').innerHTML = `
+                    <h1>🎉 Parabéns!</h1>
+                    <p class="sub">Todas as 15 rodadas foram concluídas com excelência!</p>
+                    <button onclick="location.reload()" style="padding:10px 20px; background:#1d4ed8; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Reiniciar Atividade</button>
+                `;
+                return;
+            }
+
+            const d = listaDesafios[atualIndex];
+            document.getElementById('numDesafio').innerText = atualIndex + 1;
+            document.getElementById('emojiFigura').innerText = d.dica;
+            document.getElementById('mensagemFeedback').innerText = "";
+
+            const display = document.getElementById('palavraDisplay');
+            display.innerHTML = '';
+            
+            for (let i = 0; i < d.palavra.length; i++) {
+                const caixa = document.createElement('div');
+                caixa.classList.add('letra-caixa');
+                if (i === d.indiceOculto) {
+                    caixa.classList.add('letra-faltando');
+                    caixa.innerText = "_";
+                } else {
+                    caixa.innerText = d.palavra[i];
+                }
+                display.appendChild(caixa);
+            }
+
+            const teclado = document.getElementById('tecladoLetras');
+            teclado.innerHTML = '';
+            let ops = [...d.opcoes].sort(() => Math.random() - 0.5);
+            ops.forEach(letra => {
+                const btn = document.createElement('button');
+                btn.classList.add('btn-letra');
+                btn.innerText = letra;
+                btn.onclick = () => verificarLetra(letra, d.letraFaltando);
+                teclado.appendChild(btn);
+            });
+        }
+
+        function verificarLetra(escolhida, correta) {
+            const feedback = document.getElementById('mensagemFeedback');
+            if (escolhida === correta) {
+                feedback.style.color = "#16a34a";
+                feedback.innerText = "✨ Correto! Muito bem!";
+                atualIndex++;
+                setTimeout(carregarPalavra, 1200);
+            } else {
+                feedback.style.color = "#dc2626";
+                feedback.innerText = "❌ Letra incorreta, tente outra!";
+            }
+        }
+    </script>
+</body>
+</html>

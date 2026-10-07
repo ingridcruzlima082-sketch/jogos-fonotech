@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ginástica Orofacial - FonoTech</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .card-exercicio {
+            background-color: #ffffff;
+            border: 2px solid #2b9348;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .icone-exercicio {
+            font-size: 90px;
+            margin-bottom: 15px;
+        }
+
+        .tag-grupo {
+            display: inline-block;
+            background-color: #55a630;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .caixa-cronometro {
+            font-size: 40px;
+            font-weight: bold;
+            color: #2b9348;
+            margin: 15px 0;
+        }
+
+        .btn-controle-ex {
+            font-size: 16px;
+            padding: 12px 25px;
+            margin: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div style="display: flex; justify-content: space-between; align-items: center;" class="no-print">
+        <a href="jogos.html">
+            <button type="button">⬅️ Voltar aos Jogos</button>
+        </a>
+        <div style="font-size: 16px; font-weight: bold; color: #2b9348;">
+            Exercício: <span id="numExercicio">1</span> / 10
+        </div>
+    </div>
+
+    <h1>👄 Ginástica Orofacial (Tônus e Mobilidade)</h1>
+    <p>Oriente o paciente a realizar os exercícios de praxia e fortalecimento de forma divertida.</p>
+
+    <div class="card-conteudo">
+
+        <!-- SELEÇÃO DE PACIENTE -->
+        <div id="blocoPaciente" style="margin-bottom: 20px;">
+            <label for="nomePacienteJogo"><strong>Nome do Paciente:</strong></label><br>
+            <input type="text" id="nomePacienteJogo" placeholder="Digite o nome do paciente">
+        </div>
+
+        <!-- ÁREA DO JOGO -->
+        <div id="areaJogo">
+            <div class="card-exercicio">
+                <span id="tagGrupo" class="tag-grupo">Estrutura: Língua</span>
+                
+                <div id="iconeExercicio" class="icone-exercicio">👅⬆️</div>
+                
+                <h2 id="tituloExercicio" style="color: #1e3d59; margin-top: 0;">Língua na Papila (Estalar)</h2>
+                
+                <p id="instrucaoExercicio" style="font-size: 16px; color: #444; max-width: 600px; margin: 0 auto 15px auto;">
+                    Eleve a ponta da língua até o céu da boca (atrás dos dentes superiores) e faça o som de estalar repetidamente.
+                </p>
+
+                <div class="caixa-cronometro">
+                    ⏱️ <span id="tempo">40</span>s
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <button type="button" class="btn-controle-ex" style="background-color: #2b9348;" onclick="iniciarTimer()">▶️ Iniciar Contagem</button>
+                    <button type="button" class="btn-controle-ex" style="background-color: #ee9b00;" onclick="concluirExercicio(true)">✅ Exercício Concluído</button>
+                    <button type="button" class="btn-controle-ex" style="background-color: #d90429;" onclick="concluirExercicio(false)">⏭️ Pular / Não Realizou</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA DE FINALIZAÇÃO -->
+        <div id="telaFinal" style="display: none; text-align: center; padding: 20px;">
+            <h2 style="color: #2b9348;">🎉 Treino de Motricidade Orofacial Concluído!</h2>
+            <p id="resultadoTexto" style="font-size: 18px; font-weight: bold; margin: 20px 0;"></p>
+            <button type="button" onclick="reiniciarJogo()" style="background-color: #2b9348;">🔄 Novo Treino</button>
+        </div>
+
+    </div>
+
+    <script>
+        const exercicios = [
+            // LÍNGUA
+            {
+                grupo: "Estrutura: Língua",
+                icone: "👅⬆️",
+                titulo: "Elevação de Língua (Papila)",
+                instrucao: "Toque a ponta da língua no céu da boca atrás dos dentes da frente e mantenha pressionado.",
+                tempoPadrao: 40
+            },
+            {
+                grupo: "Estrutura: Língua",
+                icone: "👅↔️",
+                titulo: "Varrer o Céu da Boca",
+                instrucao: "Passe a ponta da língua do céu da boca da frente para trás devagar.",
+                tempoPadrao: 40
+            },
+            {
+                grupo: "Estrutura: Língua",
+                icone: "👅🫧",
+                titulo: "Push na Bochecha (Lingual)",
+                instrucao: "Empurre a bochecha por dentro com a ponta da língua fazendo força contra a resistência.",
+                tempoPadrao: 40
+            },
+            // LÁBIOS
+            {
+                grupo: "Estrutura: Lábios",
+                icone: "😙",
+                titulo: "Bico Concentrado (Tônus)",
+                instrucao: "Faça um bico bem forte com os lábios bem fechados e segure a posição.",
+                tempoPadrao: 40
+            },
+            {
+                grupo: "Estrutura: Lábios",
+                icone: "😁",
+                titulo: "Sorriso Aberto (Sem Mostrar Dentes)",
+                instrucao: "Estique os lábios para os lados em posição de sorriso bem amplo mantendo os lábios selados.",
+                tempoPadrao: 40
+            },
+            {
+                grupo: "Estrutura: Lábios",
+                icone: "😙↔️😁",
+                titulo: "Alternância Bico e Sorriso",
+                instrucao: "Alterne ritmicamente entre fazer BICO e fazer SORRISO (Bico - Sorriso - Bico - Sorriso).",
+                tempoPadrao: 40
+            },
+            // BOCHECAS
+            {
+                grupo: "Estrutura: Bochechas",
+                icone: "🐡",
+                titulo: "Inflar Bochechas (Duplo)",
+                instrucao: "Encha as duas bochechas de ar, segure o ar sem deixar escapar pelos lábios.",
+                tempoPadrao: 40
+            },
+            {
+                grupo: "Estrutura: Bochechas",
+                icone: "🌬️",
+                titulo: "Transferir Ar entre Bochechas",
+                instrucao: "Encha de ar a bochecha direita e depois passe o ar para a bochecha esquerda.",
+                tempoPadrao: 40
+            },
+            {
+                grupo: "Estrutura: Bochechas",
+                icone: "😮‍💨",
+                titulo: "Sucção de Bochechas (Peixinho)",
+                instrucao: "Sugue as bochechas para dentro fazendo bico de peixinho e segure.",
+                tempoPadrao: 40
+            },
+            // COMBINADO
+            {
+                grupo: "Estrutura: Selamento / Praxia",
+                icone: "🎙️🔠",
+                titulo: "Emissão de Estalo e Explosão",
+                instrucao: "Estale a língua 5 vezes e emita a sílaba PA-PA-PA forte promovendo fechamento labial.",
+                tempoPadrao: 40
+            }
+        ];
+
+        let indiceAtual = 0;
+        let exerciciosConcluidos = 0;
+        let timer = null;
+        let tempoRestante = 40;
+
+        document.addEventListener("DOMContentLoaded", carregarExercicio);
+
+        function carregarExercicio() {
+            if (indiceAtual >= exercicios.length) {
+                finalizarTreino();
+                return;
+            }
+
+            clearInterval(timer);
+            let ex = exercicios[indiceAtual];
+            
+            document.getElementById("numExercicio").innerText = indiceAtual + 1;
+            document.getElementById("tagGrupo").innerText = ex.grupo;
+            document.getElementById("iconeExercicio").innerText = ex.icone;
+            document.getElementById("tituloExercicio").innerText = ex.titulo;
+            document.getElementById("instrucaoExercicio").innerText = ex.instrucao;
+            
+            tempoRestante = ex.tempoPadrao;
+            document.getElementById("tempo").innerText = tempoRestante;
+        }
+
+        function iniciarTimer() {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                tempoRestante--;
+                document.getElementById("tempo").innerText = tempoRestante;
+                if (tempoRestante <= 0) {
+                    clearInterval(timer);
+                    alert("⏰ Tempo concluído!");
+                }
+            }, 1000);
+        }
+
+        function concluirExercicio(realizou) {
+            clearInterval(timer);
+            if (realizou) {
+                exerciciosConcluidos++;
+            }
+            indiceAtual++;
+            carregarExercicio();
+        }
+
+        function finalizarTreino() {
+            document.getElementById("areaJogo").style.display = "none";
+            document.getElementById("telaFinal").style.display = "block";
+
+            let nome = document.getElementById("nomePacienteJogo").value.trim() || "Paciente Não Identificado";
+            document.getElementById("resultadoTexto").innerText = `${nome} realizou ${exerciciosConcluidos} de 10 exercícios de Ginástica Orofacial!`;
+
+            if (nome !== "Paciente Não Identificado") {
+                let chave = "historico_" + nome.toLowerCase();
+                let historico = JSON.parse(localStorage.getItem(chave)) || [];
+                
+                historico.push({
+                    jogo: "Ginástica Orofacial (Mobilidade e Tônus)",
+                    sessao: historico.length + 1,
+                    pontuacao: `${exerciciosConcluidos} de 10 concluídos`,
+                    data: new Date().toLocaleDateString("pt-BR")
+                });
+
+                localStorage.setItem(chave, JSON.stringify(historico));
+            }
+        }
+
+        function reiniciarJogo() {
+            indiceAtual = 0;
+            exerciciosConcluidos = 0;
+            document.getElementById("areaJogo").style.display = "block";
+            document.getElementById("telaFinal").style.display = "none";
+            carregarExercicio();
+        }
+    </script>
+
+</body>
+
+</html>

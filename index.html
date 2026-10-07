@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>FonoTech - Plataforma Clínica Fonoaudiológica</title>
+    <!-- Importação da fonte estilo Alice / Clássica do Canva -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #FFCFE2 !important; /* Pastel Petal */
+            font-family: 'Lora', serif !important;
+            color: #581C23 !important;            /* Burgundy */
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2, h3, .cabecalho-hub h1 {
+            font-family: 'Playfair Display', serif !important;
+            letter-spacing: 0.5px;
+        }
+        .container-hub {
+            max-width: 1000px;
+            margin: 30px auto;
+            background: #FFFDF9;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(88, 28, 35, 0.08);
+            border: 2px solid #CDD98D;
+        }
+        .cabecalho-hub {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+        .cabecalho-hub h1 {
+            color: #581C23;
+            font-size: 34px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .cabecalho-hub p {
+            color: #713f12;
+            font-size: 16px;
+            font-style: italic;
+        }
+        .secao-grid {
+            margin-bottom: 35px;
+        }
+        .secao-grid h2 {
+            color: #581C23;
+            border-bottom: 2px solid #CDD98D;
+            padding-bottom: 8px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 600;
+        }
+        .botoes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 15px;
+        }
+        .botoes-grid a {
+            text-decoration: none;
+        }
+        .botoes-grid button {
+            width: 100% !important;
+            height: 80px !important;
+            padding: 0 20px !important;
+            border-radius: 16px !important;
+            font-size: 14.5px !important;
+            font-family: 'Lora', serif !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: all 0.25s ease-in-out !important;
+            text-align: left !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            border: 1.5px solid #CDD98D !important;
+            box-shadow: 0 4px 12px rgba(88, 28, 35, 0.05) !important;
+            background-color: #CDD98D !important; /* Pale Amber */
+            color: #581C23 !important;            /* Burgundy */
+        }
+        .botoes-grid button:hover {
+            transform: translateY(-3px) !important;
+            background-color: #F33F0A !important;  /* Blazing Flame */
+            color: #FFFDF9 !important;
+            border-color: #F33F0A !important;
+            box-shadow: 0 6px 18px rgba(243, 63, 10, 0.2) !important;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 13px;
+            color: #581C23;
+            border-top: 1px solid rgba(205, 217, 141, 0.5);
+            padding-top: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-hub">
+        <div class="cabecalho-hub">
+            <h1>FonoTech</h1>
+            <p>Painel Clínico Geral &bull; Gestão, Anamneses, Avaliações e Jogos Fonoaudiológicos</p>
+        </div>
+
+        <!-- MÓDULO DE ANAMNESES -->
+        <div class="secao-grid">
+            <h2>Módulo de Anamneses</h2>
+            <div class="botoes-grid">
+                <a href="anamneses.html"><button type="button">📋 Central de Anamneses</button></a>
+                <a href="anamnese_linguagem_infantil.html"><button type="button">👶 Anamnese de Linguagem Infantil</button></a>
+            </div>
+        </div>
+
+        <!-- MÓDULO DE AVALIAÇÕES E PROTOCOLOS -->
+        <div class="secao-grid">
+            <h2>Protocolos de Avaliação</h2>
+            <div class="botoes-grid">
+                <a href="avaliacoes.html"><button type="button">📋 Central de Avaliações</button></a>
+                <a href="proc.html"><button type="button">📝 Protocolo PROC</button></a>
+                <a href="abfw.html"><button type="button">🗣️ Teste ABFW</button></a>
+                <a href="confias.html"><button type="button">🧩 Teste CONFIAS</button></a>
+                <a href="protocolo_mbgr.html"><button type="button">📐 Protocolo MBGR</button></a>
+                <a href="protocolo_proc.html"><button type="button">📑 Protocolo PROC Detalhado</button></a>
+                <a href="protocolo_abfw_vocabulario.html"><button type="button">📖 ABFW Vocabulário</button></a>
+                <a href="avaliacao_linguagem.html"><button type="button">💬 Avaliação de Linguagem</button></a>
+                <a href="avaliacao_voz.html"><button type="button">🎶 Avaliação de Voz</button></a>
+                <a href="avaliacao_gagueira.html"><button type="button">🗣️ Avaliação de Gagueira</button></a>
+                <a href="avaliacao_disfagia.html"><button type="button">🥣 Avaliação de Disfagia</button></a>
+                <a href="avaliacao_afasia.html"><button type="button">🧠 Avaliação de Afasia</button></a>
+                <a href="avaliacao_mo.html"><button type="button">💪 Avaliação de Motricidade Orofacial</button></a>
+            </div>
+        </div>
+
+<!-- MÓDULO DE DOCUMENTOS E RELATÓRIOS -->
+        <div class="secao-grid">
+            <h2>Documentos e Relatórios Clínicos</h2>
+            <div class="botoes-grid">
+                <a href="documentos.html"><button type="button">📁 Central de Documentos</button></a>
+                <a href="evolucoes.html"><button type="button">📈 Relatórios de Evolução</button></a>
+                <a href="planejamento.html"><button type="button">📅 Planejamento Terapêutico</button></a>
+                <a href="parecer.html"><button type="button">⚖️ Parecer Fonoaudiológico</button></a>
+                <a href="declaracao_atendimento.html"><button type="button">📝 Declaração de Atendimento</button></a>
+                <a href="receituario.html"><button type="button">💊 Receituário / Orientações</button></a>
+                <a href="tcle.html"><button type="button">✍️ Termo de Consentimento (TCLE)</button></a>
+            </div>
+        </div>
+
+        <!-- MÓDULO DA CENTRAL DE JOGOS -->
+        <div class="secao-grid">
+            <h2>Central de Jogos e Treinos Fonoaudiológicos</h2>
+            <div class="botoes-grid">
+                <a href="jogos.html"><button type="button">🎮 Aceder à Central de Jogos Completa</button></a>
+                <a href="intencao.html"><button type="button">💬 Intenção Comunicativa</button></a>
+                <a href="fluencia.html"><button type="button">🧠 Treino de Fluência e DDK</button></a>
+                <a href="caca_fonemas.html"><button type="button">🔍 Caça aos Fonemas</button></a>
+                <a href="consciencia.html"><button type="button">🧩 Consciência Fonológica</button></a>
+                <a href="decodificacao.html"><button type="button">📖 Decodificação de Leitura</button></a>
+                <a href="fabrica_historias.html"><button type="button">📚 Fábrica de Histórias</button></a>
+                <a href="formando_frases.html"><button type="button">✍️ Formando Frases</button></a>
+                <a href="frase_correta.html"><button type="button">✔️ Frase Correta</button></a>
+                <a href="ginastica_orofacial.html"><button type="button">💪 Ginástica Orofacial</button></a>
+                <a href="jogo_sequencia_logica.html"><button type="button">🔄 Sequência Lógica</button></a>
+                <a href="lince.html"><button type="button">👁️ Jogo do Lince</button></a>
+                <a href="correcao_frases.html"><button type="button">✏️ Correção e Ordem de Frases</button></a>
+                <a href="associacao_visual.html"><button type="button">🧩 Associação e Categorização Visual</button></a>
+                <a href="rotina_diaria.html"><button type="button">🗓️ Quadro de Rotina Diária</button></a>
+                <a href="jogo_memoria.html"><button type="button">🧠 Jogo da Memória dos Fonemas</button></a>
+                <a href="jogo_logica.html"><button type="button">🔢 Sequência Lógica (Letras e Números)</button></a>
+                <a href="jogo_escrita.html"><button type="button">✏️️ Complete a Palavra (Linguagem Escrita)</button></a>
+                <a href="jogo_forca.html"><button type="button">🎯 Jogo da Forca Clínico</button></a>
+                <a href="radio_misteriosa.html"><button type="button">📻 Rádio Misteriosa (Compreensão Auditiva)</button></a>
+                <a href="emoji_tradutor.html"><button type="button">💬 Emoji Tradutor (Expressão Oral)</button></a>
+                <a href="fabrica_palavras.html"><button type="button">🏗️ Fábrica de Palavras (Sílabas)</button></a>
+                <a href="eco_ou_nao.html"><button type="button">👂 Eco ou Não? (Pares Mínimos)</button></a>
+                <a href="semaforo_fala.html"><button type="button">🚦 Semáforo da Fala (Ritmo e Fluência)</button></a>
+                <a href="construtor_frases.html"><button type="button">📈 Construtor de Frases Longas</button></a>
+                <a href="espelho_magico.html"><button type="button">🪞 Espelho Mágico (Articulação)</button></a>
+                <a href="maratona_bochecha.html"><button type="button">🎈 Maratona da Bochecha (Tonicidade)</button></a>
+                <a href="conversa_real.html"><button type="button">🧠 Modo Difícil: Conversa Real (Pragmática)</button></a>
+                <a href="rede_social_fake.html"><button type="button">📱 Rede Social Fake (Ironia e Duplo Sentido)</button></a>
+                <a href="detetive_ortografico.html"><button type="button">🔍 Detetive Ortográfico</button></a>
+            </div>
+        </div>
+
+        <footer>
+            <p>FonoTech &copy; 2026 - Todos os direitos reservados. Plataforma Clínica e Interativa.</p>
+        </footer>
+    </div>
+</body>
+</html>

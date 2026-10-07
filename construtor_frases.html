@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Construtor de Frases Longas - FonoTech</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        h1 { color: #1e293b; margin-bottom: 5px; font-size: 24px; }
+        p.sub { color: #64748b; margin-bottom: 25px; font-size: 14px; }
+        .form-identificacao { margin: 20px 0; padding: 20px; background: #f1f5f9; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .form-identificacao input { padding: 10px; font-size: 15px; width: 80%; max-width: 350px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 8px; outline: none; }
+        .btn-iniciar { background-color: #1d4ed8; color: white; border: none; padding: 10px 25px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; display: block; margin-left: auto; margin-right: auto; }
+        .btn-iniciar:hover { background-color: #1e40af; }
+        .jogo-area { display: none; }
+        .frase-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 25px 0; font-size: 22px; font-weight: bold; min-height: 60px; align-items: center; }
+        .bloco-palavra { background: #f3e8ff; color: #5b21b6; border: 1px solid #d8b4fe; padding: 10px 15px; border-radius: 6px; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .voltar-link { display: inline-block; margin-top: 30px; text-decoration: none; color: #64748b; font-weight: bold; }
+        .voltar-link:hover { color: #1e293b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📈 Construtor de Frases Longas</h1>
+        <p class="sub">Expansão gradual do enunciado mantendo a fluência e o controle de ritmo</p>
+
+        <!-- TELA DE IDENTIFICAÇÃO -->
+        <div id="telaIdentificacao" class="form-identificacao">
+            <label style="font-weight: bold; display: block;">Nome do Paciente:</label>
+            <input type="text" id="nomePaciente" placeholder="Nome completo...">
+            <button type="button" class="btn-iniciar" onclick="iniciar()">Iniciar 🚀</button>
+        </div>
+
+        <!-- ÁREA DO JOGO -->
+        <div id="telaJogo" class="jogo-area">
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 10px;">Paciente: <strong id="exibirNome"></strong></div>
+            <div>Rodada (Frase) <span id="numRodada">1</span> de 12 | Bloco <span id="nivelAtual">1</span> / <span id="totalNiveis"></span></div>
+            
+            <div class="frase-container" id="fraseContainer"></div>
+            
+            <div id="feedback" style="margin-bottom: 15px; font-weight: bold; color: #16a34a; min-height: 24px;"></div>
+
+            <button onclick="adicionarPalavra()" id="btnAvancar" style="padding: 12px 25px; background: #16a34a; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px;">Acrescentar Palavra (Fluência OK) ✅</button>
+            <br>
+            <button onclick="proximaFrase()" id="btnProxima" style="margin-top: 15px; padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: none;">Avançar para Próxima Frase ➡️</button>
+        </div>
+
+        <a href="index.html" class="voltar-link">⬅️ Voltar para a Pasta de Jogos</a>
+    </div>
+
+    <script>
+        const listaFrases = [
+            ["O", "menino", "joga", "bola", "no", "campo"],
+            ["A", "menina", "comprou", "um", "livro", "novo"],
+            ["O", "cachorro", "latiu", "forte", "para", "o", "gato"],
+            ["A", "professora", "escreveu", "a", "lição", "no", "quadro"],
+            ["O", "sol", "brilha", "forte", "no", "céu", "azul"],
+            ["A", "mamãe", "preparou", "um", "bolo", "de", "chocolate"],
+            ["O", "pássaro", "cantou", "na", "árvore", "do", "quintal"],
+            ["O", "carro", "vermelho", "passou", "correndo", "na", "rua"],
+            ["A", "criança", "pegou", "o", "brinquedo", "na", "caixa"],
+            ["O", "gato", "subiu", "no", "telhado", "alto"],
+            ["A", "flor", "nasceu", "no", "jardim", "da", "casa"],
+            ["O", "trem", "apitou", "e", "saiu", "da", "estação"]
+        ];
+
+        let rodadaIdx = 0;
+        let nivelPalavras = 1;
+
+        function iniciar() {
+            let nome = document.getElementById('nomePaciente').value.trim();
+            if(!nome) return alert('Por favor, digite o nome do paciente.');
+            document.getElementById('exibirNome').innerText = nome;
+            document.getElementById('telaIdentificacao').style.display = 'none';
+            document.getElementById('telaJogo').style.display = 'block';
+            carregarRodada();
+        }
+
+        function carregarRodada() {
+            if(rodadaIdx >= listaFrases.length) {
+                document.getElementById('telaJogo').innerHTML = `
+                    <h1>🎉 Parabéns!</h1>
+                    <p class="sub">Todas as 12 rodadas do Construtor de Frases Longas foram concluídas com excelência!</p>
+                    <button onclick="location.reload()" style="padding:10px 20px; background:#1d4ed8; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Reiniciar Atividade</button>
+                `;
+                return;
+            }
+
+            nivelPalavras = 1;
+            document.getElementById('numRodada').innerText = rodadaIdx + 1;
+            document.getElementById('totalNiveis').innerText = listaFrases[rodadaIdx].length;
+            document.getElementById('btnAvancar').style.display = 'inline-block';
+            document.getElementById('btnProxima').style.display = 'none';
+            document.getElementById('feedback').innerText = "";
+            renderizar();
+        }
+
+        function renderizar() {
+            let fraseAtual = listaFrases[rodadaIdx];
+            document.getElementById('nivelAtual').innerText = nivelPalavras;
+            let c = document.getElementById('fraseContainer');
+            c.innerHTML = '';
+            
+            for(let i = 0; i < nivelPalavras; i++) {
+                let div = document.createElement('div');
+                div.className = 'bloco-palavra';
+                div.innerText = fraseAtual[i];
+                c.appendChild(div);
+            }
+        }
+
+        function adicionarPalavra() {
+            let fraseAtual = listaFrases[rodadaIdx];
+            if(nivelPalavras < fraseAtual.length) {
+                nivelPalavras++;
+                renderizar();
+                if(nivelPalavras === fraseAtual.length) {
+                    document.getElementById('feedback').innerText = "✨ Frase completa alcançada com fluência!";
+                    document.getElementById('btnAvancar').style.display = 'none';
+                    document.getElementById('btnProxima').style.display = 'inline-block';
+                }
+            }
+        }
+
+        function proximaFrase() {
+            rodadaIdx++;
+            carregarRodada();
+        }
+    </script>
+</body>
+</html>

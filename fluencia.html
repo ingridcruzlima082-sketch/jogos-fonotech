@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Treino de Fluência e DDK - FonoTech</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .pagina-documento {
+            max-width: 800px;
+            margin: 20px auto 80px auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: #222;
+        }
+
+        .cabecalho-doc {
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-start;
+            border-bottom: 2px solid #2a9d8f;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .dados-profissional {
+            text-align: right;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .titulo-doc {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #2a9d8f;
+            margin: 20px 0 10px 0;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitulo-doc {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .bloco-treino {
+            background-color: #f8f9fa;
+            border: 1px solid #2a9d8f;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .visual-display {
+            font-size: 32px;
+            font-weight: bold;
+            color: #264653;
+            margin: 20px 0;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-acao {
+            background-color: #2a9d8f;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .btn-acao:hover {
+            background-color: #21867a;
+        }
+
+        .campo-paciente {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 15px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        @media print {
+            .no-print, button { display: none !important; }
+            body { background: white !important; }
+            .pagina-documento { border: none !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="max-width: 800px; margin: 10px auto;">
+        <a href="index.html"><button type="button">⬅️ Voltar ao Menu Principal</button></a>
+    </div>
+
+    <div class="pagina-documento">
+        <div class="cabecalho-doc">
+            <div class="dados-profissional">
+                <strong>Ingrid Cruz</strong><br>
+                Fonoaudióloga<br>
+                CRFa 8-13571
+            </div>
+        </div>
+
+        <div class="titulo-doc">🧠 TREINO DE FLUÊNCIA E DIADOCOCINESIA</div>
+        <div class="subtitulo-doc">Controle de Prolongamentos, Suavização de Bloqueios e Agilidade Articulatória</div>
+
+        <div class="no-print" style="margin-bottom: 20px;">
+            <label><strong>Paciente em Atendimento:</strong></label>
+            <input type="text" id="nomePaciente" class="campo-paciente" placeholder="Digite o nome completo do paciente...">
+        </div>
+
+        <!-- MODO 1: PROLONGAMENTO E SUAVIZAÇÃO -->
+        <div class="bloco-treino">
+            <h3 style="color: #2a9d8f; margin-top: 0;">1. Treino de Início Suave e Prolongamento</h3>
+            <p style="font-size: 14px; color: #555;">Conecte a voz de forma gradual e prolongue o som da vogal/palavra para evitar bloqueios bruscos.</p>
+            <div class="visual-display" id="displayProlongamento">Aaaaa... Sssss... Mmmm...</div>
+            <button class="btn-acao" onclick="iniciarProlongamento()">🔄 Sortear Estímulo</button>
+        </div>
+
+        <!-- MODO 2: DIADOCOCINESIA (DDK) -->
+        <div class="bloco-treino">
+            <h3 style="color: #2a9d8f; margin-top: 0;">2. Sequência de Diadococinesia (DDK)</h3>
+            <p style="font-size: 14px; color: #555;">Treino de sequências rápidas para agilidade motora oral (fala encadeada).</p>
+            <div class="visual-display" id="displayDDK">PA - TA - KA</div>
+            <button class="btn-acao" onclick="iniciarDDK()">▶️ Alternar Sequência</button>
+        </div>
+
+        <!-- REGISTRO E SALVAMENTO -->
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;" class="no-print">
+            <button type="button" onclick="salvarSessaoFluencia()" style="background-color: #2b9348; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">💾 Salvar Sessão no Histórico</button>
+        </div>
+    </div>
+
+    <script>
+        const listaProlongamentos = [
+            "Aaaaa... sol (Início suave)",
+            "Sssss... sapo (Prolongamento fricativo)",
+            "Mmmm... mel (Ressonância inicial)",
+            "Vvvv... vela (Controle de fluxo aéreo)",
+            "Ffff... faca (Suavização articulatória)",
+            "Llll... lua (Fluência contínua)"
+        ];
+
+        const listaDDK = [
+            "PA - TA - KA",
+            "PIS - TIS - KIS",
+            "PA - PA - TA - TA - KA - KA",
+            "B - D - G",
+            "TA - KA - PA"
+        ];
+
+        function iniciarProlongamento() {
+            const aleatorio = listaProlongamentos[Math.floor(Math.random() * listaProlongamentos.length)];
+            document.getElementById('displayProlongamento').innerText = aleatorio;
+        }
+
+        function iniciarDDK() {
+            const aleatorio = listaDDK[Math.floor(Math.random() * listaDDK.length)];
+            document.getElementById('displayDDK').innerText = aleatorio;
+        }
+
+        function salvarSessaoFluencia() {
+            const nome = document.getElementById('nomePaciente').value.trim();
+            if (!nome) {
+                alert("⚠️ Por favor, informe o nome do paciente antes de salvar!");
+                return;
+            }
+
+            const chave = "historico_" + nome.toLowerCase();
+            const historico = JSON.parse(localStorage.getItem(chave)) || [];
+
+            historico.push({
+                jogo: "Treino de Fluência e DDK",
+                sessao: historico.length + 1,
+                pontuacao: "Exercícios de prolongamento e agilidade aplicados",
+                data: new Date().toLocaleDateString("pt-BR")
+            });
+
+            localStorage.setItem(chave, JSON.stringify(historico));
+            alert(`✅ Sessão de Fluência salva no histórico de ${nome}!`);
+        }
+    </script>
+</body>
+</html>

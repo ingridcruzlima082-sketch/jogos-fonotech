@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Associação e Categorização Visual - FonoTech</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .jogo-container {
+            max-width: 750px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(91, 33, 182, 0.08);
+            text-align: center;
+        }
+        .dica-terapeuta {
+            background-color: #ede9fe;
+            color: #5b21b6;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: left;
+        }
+        .card-visual {
+            background: #f8fafc;
+            border: 2px solid #d8b4fe;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        .emoji-grande {
+            font-size: 75px;
+            margin-bottom: 10px;
+        }
+        .pergunta-texto {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d2640;
+            margin-top: 10px;
+        }
+        .opcoes-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .btn-opcao {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 14px;
+            border: 1px solid #d8b4fe;
+            background-color: #f3e8ff;
+            color: #5b21b6;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-opcao:hover {
+            background-color: #e9d5ff;
+            transform: translateY(-2px);
+        }
+        .feedback {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .input-nome {
+            width: 80%;
+            padding: 14px;
+            font-size: 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+        .btn-iniciar {
+            background-color: #5b21b6;
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div style="max-width: 750px; margin: 20px auto 0 auto;" class="no-print">
+        <a href="jogos.html" style="text-decoration: none;"><button type="button" style="padding: 10px 20px; background-color: #ede9fe; color: #5b21b6; border: none; border-radius: 12px; font-weight: bold; cursor: pointer;">⬅️ Voltar à Central de Jogos</button></a>
+    </div>
+
+    <div class="jogo-container">
+        <h1 style="color: #2d2640; font-size: 26px; margin-bottom: 8px;">🧩 Associação e Categorização Visual</h1>
+        <p style="color: #6e6280; margin-bottom: 25px;">Treino de estruturação semântica e vocabulário visual para pacientes não oralizados.</p>
+
+        <!-- TELA DE IDENTIFICAÇÃO -->
+        <div id="telaInicio">
+            <div class="dica-terapeuta">
+                💡 <strong>Orientações:</strong> Informe o nome do paciente para registrar automaticamente a sessão no prontuário. O exercício estimula o reconhecimento de categorias visuais (Alimentos, Animais, Emoções, etc.).
+            </div>
+            <input type="text" id="nomePacienteInput" class="input-nome" placeholder="Digite o nome completo do paciente...">
+            <br>
+            <button type="button" class="btn-iniciar" onclick="iniciarSessao()">Iniciar Treino ➡️</button>
+        </div>
+
+        <!-- TELA DO JOGO -->
+        <div id="telaJogo" style="display: none;">
+            <div id="infoSessao" style="font-size: 13px; color: #6e6280; margin-bottom: 15px; font-weight: 600;"></div>
+            <div id="progresso" style="font-weight: 600; color: #7c3aed; margin-bottom: 5px;">Desafio 1 de 10</div>
+
+            <div class="card-visual">
+                <div class="emoji-grande" id="emojiVisual">🍎</div>
+                <div class="pergunta-texto" id="perguntaTexto">A qual categoria pertence este item?</div>
+            </div>
+
+            <div class="opcoes-grid" id="opcoesContainer"></div>
+
+            <div class="feedback" id="feedbackMsg"></div>
+
+            <button type="button" id="btnProximo" onclick="proximaRodada()" style="display: none; margin: 25px auto 0 auto; padding: 12px 30px; background-color: #5b21b6; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer;">Próximo Desafio ➡️</button>
+        </div>
+    </div>
+
+    <script>
+        let pacienteNome = "";
+        let sessaoContador = 1;
+
+        const desafios = [
+            { emoji: "🍎", texto: "Onde classificamos a Maçã?", correta: "Alimento", opcoes: ["Alimento", "Animal", "Roupa", "Brinquedo"] },
+            { emoji: "🐶", texto: "Onde classificamos o Cachorro?", correta: "Animal", opcoes: ["Alimento", "Animal", "Veículo", "Móvel"] },
+            { emoji: "👕", texto: "Onde classificamos a Camisa?", correta: "Vestuário", opcoes: ["Alimento", "Vestuário", "Animal", "Brinquedo"] },
+            { emoji: "🚗", texto: "Onde classificamos o Carro?", correta: "Meio de Transporte", opcoes: ["Alimento", "Meio de Transporte", "Animal", "Vestuário"] },
+            { emoji: "😊", texto: "O que esta expressão representa?", correta: "Alegria / Emoção", opcoes: ["Alegria / Emoção", "Alimento", "Veículo", "Brinquedo"] },
+            { emoji: "🍌", texto: "Onde classificamos a Banana?", correta: "Alimento", opcoes: ["Alimento", "Vestuário", "Animal", "Móvel"] },
+            { emoji: "🐱", texto: "Onde classificamos o Gato?", correta: "Animal", opcoes: ["Alimento", "Animal", "Veículo", "Roupa"] },
+            { emoji: "🏠", texto: "Onde classificamos a Casa?", correta: "Lugar / Moradia", opcoes: ["Alimento", "Animal", "Lugar / Moradia", "Brinquedo"] },
+            { emoji: "⚽", texto: "Onde classificamos a Bola?", correta: "Brinquedo / Lazer", opcoes: ["Alimento", "Animal", "Brinquedo / Lazer", "Vestuário"] },
+            { emoji: "💧", texto: "Onde classificamos a Água?", correta: "Bebida / Alimento", opcoes: ["Bebida / Alimento", "Animal", "Roupa", "Veículo"] }
+        ];
+
+        let rodadaAtual = 0;
+        let pontuacao = 0;
+
+        function iniciarSessao() {
+            const nomeInput = document.getElementById('nomePacienteInput').value.trim();
+            if (!nomeInput) {
+                alert("Por favor, informe o nome do paciente.");
+                return;
+            }
+            pacienteNome = nomeInput;
+
+            const chaveHist = "historico_" + pacienteNome.toLowerCase();
+            const historicoExistente = JSON.parse(localStorage.getItem(chaveHist)) || [];
+            const sessoesAnteriores = historicoExistente.filter(h => h.jogo.includes("Categorização Visual")).length;
+            sessaoContador = sessoesAnteriores + 1;
+
+            document.getElementById('infoSessao').innerHTML = `Paciente: <strong>${pacienteNome}</strong> &bull; Sessão Nº <strong>${sessaoContador}</strong>`;
+            document.getElementById('telaInicio').style.display = 'none';
+            document.getElementById('telaJogo').style.display = 'block';
+            carregarRodada();
+        }
+
+        function carregarRodada() {
+            document.getElementById('feedbackMsg').innerText = "";
+            document.getElementById('btnProximo').style.display = "none";
+
+            if (rodadaAtual >= desafios.length) {
+                document.getElementById('progresso').innerText = "Treino Concluído!";
+                document.getElementById('emojiVisual').innerText = "🎉";
+                document.getElementById('perguntaTexto').innerHTML = `Sessão Finalizada!<br>Acertos: ${pontuacao} de ${desafios.length}`;
+                document.getElementById('opcoesContainer').innerHTML = '';
+                salvarNoHistorico();
+                return;
+            }
+
+            document.getElementById('progresso').innerText = `Desafio ${rodadaAtual + 1} de ${desafios.length}`;
+            const atual = desafios[rodadaAtual];
+            
+            document.getElementById('emojiVisual').innerText = atual.emoji;
+            document.getElementById('perguntaTexto').innerText = atual.texto;
+
+            const opcoesEmbaralhadas = [...atual.opcoes].sort(() => Math.random() - 0.5);
+            const container = document.getElementById('opcoesContainer');
+            container.innerHTML = '';
+
+            opcoesEmbaralhadas.forEach(opcao => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-opcao';
+                btn.innerText = opcao;
+                btn.onclick = () => verificar(opcao, atual.correta);
+                container.appendChild(btn);
+            });
+        }
+
+        function verificar(escolhida, correta) {
+            const feedback = document.getElementById('feedbackMsg');
+            const botoes = document.querySelectorAll('.btn-opcao');
+            botoes.forEach(b => b.disabled = true);
+
+            if (escolhida === correta) {
+                feedback.style.color = "#15803d";
+                feedback.innerText = "✔️ Correto! Excelente associação.";
+                pontuacao++;
+            } else {
+                feedback.style.color = "#b91c1c";
+                feedback.innerText = `❌ Incorreto. O grupo correto é: ${correta}`;
+            }
+            document.getElementById('btnProximo').style.display = "block";
+        }
+
+        function proximaRodada() {
+            rodadaAtual++;
+            carregarRodada();
+        }
+
+        function salvarNoHistorico() {
+            const chaveHist = "historico_" + pacienteNome.toLowerCase();
+            const historico = JSON.parse(localStorage.getItem(chaveHist)) || [];
+            const d = new Date();
+            const dataFormatada = d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", {hour: '2-digit', minute:'2-digit'});
+
+            historico.push({
+                data: dataFormatada,
+                jogo: `Associação e Categorização Visual (Sessão ${sessaoContador})`,
+                pontuacao: `${pontuacao} / ${desafios.length} acertos`
+            });
+            localStorage.setItem(chaveHist, JSON.stringify(historico));
+
+            const aviso = document.createElement('div');
+            aviso.style.cssText = "margin-top: 20px; padding: 12px; background: #dcfce7; color: #15803d; border-radius: 8px; font-weight: bold;";
+            aviso.innerText = `✅ Sessão ${sessaoContador} salva automaticamente no prontuário de ${pacienteNome}!`;
+            document.querySelector('.jogo-container').appendChild(aviso);
+        }
+    </script>
+</body>
+</html>

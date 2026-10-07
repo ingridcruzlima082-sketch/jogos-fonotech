@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Sequência Lógica (Letras e Números) - FonoTech</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        h1 { color: #1e293b; margin-bottom: 5px; font-size: 24px; }
+        p.sub { color: #64748b; margin-bottom: 25px; font-size: 14px; }
+        .form-identificacao {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+        }
+        .form-identificacao input {
+            padding: 10px;
+            font-size: 15px;
+            width: 80%;
+            max-width: 350px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            margin-top: 8px;
+            outline: none;
+        }
+        .btn-iniciar {
+            background-color: #1d4ed8;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .btn-iniciar:hover { background-color: #1e40af; }
+        .jogo-area { display: none; }
+        .bloco-desafio {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .sequencia-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .item-seq {
+            background: #ffffff;
+            border: 2px solid #3b82f6;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            color: #1e293b;
+        }
+        .item-vazio {
+            background: #fef08a;
+            border: 2px dashed #ca8a04;
+            color: #ca8a04;
+        }
+        .opcoes-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .botao-opcao {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .botao-opcao:hover { background-color: #1d4ed8; }
+        .mensagem {
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 15px;
+            min-height: 24px;
+        }
+        .voltar-link {
+            display: inline-block;
+            margin-top: 30px;
+            text-decoration: none;
+            color: #64748b;
+            font-weight: bold;
+        }
+        .voltar-link:hover { color: #1e293b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔢 Sequência Lógica (Letras e Números)</h1>
+        <p class="sub">Descubra o padrão numérico ou alfabético e complete a sequência</p>
+
+        <!-- TELA DE IDENTIFICAÇÃO -->
+        <div id="telaIdentificacao" class="form-identificacao">
+            <label for="nomePaciente" style="font-weight: bold; color: #1e293b; display: block;">Nome do Paciente:</label>
+            <input type="text" id="nomePaciente" placeholder="Digite o nome completo do paciente...">
+            <button type="button" class="btn-iniciar" onclick="iniciarAtividade()">Iniciar Atividade 🚀</button>
+        </div>
+
+        <!-- ÁREA DO JOGO -->
+        <div id="telaJogo" class="jogo-area">
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Paciente: <strong id="exibirNome" style="color: #1e293b;"></strong></div>
+            <div class="bloco-desafio">
+                <div>Questão <span id="numQuestao">1</span> de 15</div>
+                <div class="sequencia-display" id="sequenciaDisplay"></div>
+            </div>
+
+            <div>Escolha o elemento que completa a sequência:</div>
+            <div class="opcoes-container" id="opcoesContainer"></div>
+
+            <div class="mensagem" id="mensagemFeedback"></div>
+        </div>
+
+        <div>
+            <a href="index.html" class="voltar-link">⬅️ Voltar para a Pasta de Jogos</a>
+        </div>
+    </div>
+
+    <script>
+        const desafios = [
+            { seq: ["A", "B", "A", "B", "?"], correta: "A", opcoes: ["A", "B", "C"] },
+            { seq: ["1", "2", "3", "4", "?"], correta: "5", opcoes: ["4", "5", "6"] },
+            { seq: ["2", "4", "6", "8", "?"], correta: "10", opcoes: ["9", "10", "12"] },
+            { seq: ["A", "C", "A", "C", "?"], correta: "A", opcoes: ["A", "B", "C"] },
+            { seq: ["10", "9", "8", "7", "?"], correta: "6", opcoes: ["5", "6", "8"] },
+            { seq: ["3", "6", "9", "?"], correta: "12", opcoes: ["10", "11", "12"] },
+            { seq: ["X", "Y", "X", "Y", "?"], correta: "X", opcoes: ["X", "Y", "Z"] },
+            { seq: ["5", "10", "15", "?"], correta: "20", opcoes: ["18", "20", "25"] },
+            { seq: ["A", "B", "C", "?"], correta: "D", opcoes: ["D", "E", "C"] },
+            { seq: ["1", "3", "5", "7", "?"], correta: "9", opcoes: ["8", "9", "10"] },
+            { seq: ["M", "N", "M", "N", "?"], correta: "M", opcoes: ["M", "N", "O"] },
+            { seq: ["20", "18", "16", "?"], correta: "14", opcoes: ["12", "14", "15"] },
+            { seq: ["P", "Q", "P", "Q", "?"], correta: "P", opcoes: ["P", "Q", "R"] },
+            { seq: ["4", "8", "12", "?"], correta: "16", opcoes: ["14", "15", "16"] },
+            { seq: ["A", "1", "A", "1", "?"], correta: "A", opcoes: ["A", "1", "2"] }
+        ];
+
+        let indiceAtual = 0;
+
+        function iniciarAtividade() {
+            const nome = document.getElementById('nomePaciente').value.trim();
+            if (!nome) {
+                alert("Por favor, digite o nome do paciente antes de iniciar.");
+                return;
+            }
+            document.getElementById('exibirNome').innerText = nome;
+            document.getElementById('telaIdentificacao').style.display = 'none';
+            document.getElementById('telaJogo').style.display = 'block';
+            carregarDesafio();
+        }
+
+        function carregarDesafio() {
+            if (indiceAtual >= desafios.length) {
+                document.getElementById('telaJogo').innerHTML = `
+                    <h1>🎉 Parabéns!</h1>
+                    <p class="sub">Todas as 15 rodadas de raciocínio lógico (letras e números) foram concluídas!</p>
+                    <button onclick="reiniciar()" style="padding:10px 20px; background:#1d4ed8; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Reiniciar Atividade</button>
+                `;
+                return;
+            }
+
+            const atual = desafios[indiceAtual];
+            document.getElementById('numQuestao').innerText = indiceAtual + 1;
+            document.getElementById('mensagemFeedback').innerText = "";
+
+            const display = document.getElementById('sequenciaDisplay');
+            display.innerHTML = '';
+            atual.seq.forEach(item => {
+                const div = document.createElement('div');
+                div.classList.add('item-seq');
+                if (item === "?") {
+                    div.classList.add('item-vazio');
+                }
+                div.innerText = item;
+                display.appendChild(div);
+            });
+
+            const opcoesDiv = document.getElementById('opcoesContainer');
+            opcoesDiv.innerHTML = '';
+            // Embaralhar as opções de resposta para não ficarem sempre na mesma ordem
+            let opsMisturadas = [...atual.opcoes].sort(() => Math.random() - 0.5);
+            opsMisturadas.forEach(opcao => {
+                const btn = document.createElement('button');
+                btn.classList.add('botao-opcao');
+                btn.innerText = opcao;
+                btn.onclick = () => verificarResposta(opcao, atual.correta);
+                opcoesDiv.appendChild(btn);
+            });
+        }
+
+        function verificarResposta(escolha, correta) {
+            const feedback = document.getElementById('mensagemFeedback');
+            if (escolha === correta) {
+                feedback.style.color = "#16a34a";
+                feedback.innerText = "✨ Excelente! Resposta correta!";
+                indiceAtual++;
+                setTimeout(carregarDesafio, 1200);
+            } else {
+                feedback.style.color = "#dc2626";
+                feedback.innerText = "❌ Ops, tente novamente!";
+            }
+        }
+
+        function reiniciar() {
+            indiceAtual = 0;
+            location.reload();
+        }
+    </script>
+</body>
+</html>

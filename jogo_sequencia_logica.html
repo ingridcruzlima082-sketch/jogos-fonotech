@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jogo de Sequência Lógica - FonoTech</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .container-jogo {
+            max-width: 750px;
+            margin: 0 auto;
+            text-align: center;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            border: 2px solid #ee9b00;
+        }
+
+        .placar-rodada {
+            font-size: 18px;
+            font-weight: bold;
+            color: #005f73;
+            margin-bottom: 20px;
+        }
+
+        .painel-sequencia {
+            background-color: #f8f9fa;
+            border: 3px dashed #0a9396;
+            border-radius: 14px;
+            padding: 25px 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .item-sequencia {
+            font-size: 55px;
+            background: #ffffff;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+            border: 2px solid #e0e0e0;
+        }
+
+        .item-interrogacao {
+            background: #fff3bf;
+            border: 3px solid #ee9b00;
+            color: #d9480f;
+            font-weight: bold;
+            font-size: 45px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .opcoes-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .btn-opcao-figura {
+            font-size: 60px;
+            width: 100px;
+            height: 100px;
+            background-color: #ffffff;
+            border: 3px solid #005f73;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-opcao-figura:hover {
+            transform: scale(1.1);
+            background-color: #e0f2f1;
+            border-color: #0a9396;
+        }
+
+        .mensagem-feedback {
+            font-size: 22px;
+            font-weight: bold;
+            min-height: 35px;
+            margin-bottom: 15px;
+        }
+
+        .sucesso { color: #2b9348; }
+        .erro { color: #ae2012; }
+
+        .controles-jogo {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="jogos.html" class="no-print">
+        <button type="button">⬅️ Voltar aos Jogos</button>
+    </a>
+
+    <div class="container-jogo">
+        <h1 style="color: #005f73; margin-top: 0;">🧩 Sequência Lógica Visual</h1>
+        <p style="color: #555; font-size: 16px;">Qual é a figura que vem a seguir?</p>
+
+        <div class="campo-form no-print" style="max-width: 400px; margin: 0 auto 15px auto;">
+            <label for="nomePaciente"><strong>Paciente:</strong></label>
+            <input type="text" id="nomePaciente" placeholder="Digite o nome do paciente" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; text-align: center;">
+        </div>
+
+        <div class="placar-rodada">
+            Rodada <span id="numRodada">1</span> de 10 | Pontuação: <span id="pontos">0</span>
+        </div>
+
+        <!-- PAINEL DA SEQUÊNCIA -->
+        <div class="painel-sequencia" id="painelSequencia">
+            <!-- Gerado via JavaScript -->
+        </div>
+
+        <!-- MENSAGEM DE ERRO OU ACERTO -->
+        <div class="mensagem-feedback" id="feedback"></div>
+
+        <!-- FIGURAS DE ALTERNATIVAS -->
+        <div class="opcoes-container" id="opcoesContainer">
+            <!-- Gerado via JavaScript -->
+        </div>
+
+        <!-- CONTROLES -->
+        <div class="controles-jogo no-print">
+            <button type="button" onclick="reiniciarJogo()" style="background-color: #ee9b00;">🔄 Reiniciar Jogo</button>
+            <button type="button" onclick="salvarResultado()" style="background-color: #2b9348;">💾 Salvar no Histórico</button>
+        </div>
+    </div>
+
+    <!-- RODAPÉ FIXO -->
+    <footer class="no-print" style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: #005f73; color: white; text-align: center; padding: 10px; font-size: 14px;">
+        <p><strong>Ingrid Cruz</strong> | Fonoaudióloga | CRFa 8-13571</p>
+    </footer>
+
+    <script>
+        // AS 10 RODADAS DE SEQUÊNCIAS LÓGICAS COM FIGURAS (EMOJIS)
+        const rodadas = [
+            { sequencia: ["🍎", "🍌", "🍎", "🍌"], resposta: "🍎", opcoes: ["🍌", "🍎", "🍇"] },
+            { sequencia: ["🐶", "🐱", "🐶", "🐱"], resposta: "🐶", opcoes: ["🐱", "🐰", "🐶"] },
+            { sequencia: ["🔴", "🔵", "🟡", "🔴", "🔵"], resposta: "🟡", opcoes: ["🔴", "🟡", "🔵"] },
+            { sequencia: ["🚗", "🚗", "🚌", "🚗", "🚗"], resposta: "🚌", opcoes: ["🚌", "🚗", "✈️"] },
+            { sequencia: ["🌙", "⭐", "⭐", "🌙", "⭐"], resposta: "⭐", opcoes: ["🌙", "☀️", "⭐"] },
+            { sequencia: ["🌱", "🌿", "🌳", "🌱", "🌿"], resposta: "🌳", opcoes: ["🌱", "🌳", "🌿"] },
+            { sequencia: ["🐸", "🐥", "🐸", "🐥"], resposta: "🐸", opcoes: ["🐥", "🐸", "🐟"] },
+            { sequencia: ["⚽", "🏀", "🏐", "⚽", "🏀"], resposta: "🏐", opcoes: ["🏐", "⚽", "🎾"] },
+            { sequencia: ["🍦", "🍩", "🍦", "🍩"], resposta: "🍦", opcoes: ["🍩", "🍰", "🍦"] },
+            { sequencia: ["❤️", "💙", "💚", "❤️", "💙"], resposta: "💚", opcoes: ["💙", "💚", "❤️"] }
+        ];
+
+        let rodadaAtual = 0;
+        let pontuacao = 0;
+        let respondido = false;
+
+        function carregarRodada() {
+            respondido = false;
+            document.getElementById("feedback").innerText = "";
+            document.getElementById("numRodada").innerText = rodadaAtual + 1;
+            
+            const dadosRodada = rodadas[rodadaAtual];
+            const painel = document.getElementById("painelSequencia");
+            painel.innerHTML = "";
+
+            // Renderiza os itens visíveis da sequência
+            dadosRodada.sequencia.forEach(figura => {
+                const item = document.createElement("div");
+                item.className = "item-sequencia";
+                item.innerText = figura;
+                painel.appendChild(item);
+            });
+
+            // Renderiza o item com '?' no final
+            const interrogação = document.createElement("div");
+            interrogação.className = "item-sequencia item-interrogacao";
+            interrogação.innerText = "❓";
+            painel.appendChild(interrogação);
+
+            // Renderiza as alternativas de figuras
+            const containerOpcoes = document.getElementById("opcoesContainer");
+            containerOpcoes.innerHTML = "";
+
+            dadosRodada.opcoes.forEach(opcao => {
+                const btn = document.createElement("button");
+                btn.className = "btn-opcao-figura";
+                btn.innerText = opcao;
+                btn.onclick = () => verificarResposta(opcao);
+                containerOpcoes.appendChild(btn);
+            });
+        }
+
+        function verificarResposta(escolha) {
+            if (respondido) return;
+            respondido = true;
+
+            const feedback = document.getElementById("feedback");
+            const respostaCorreta = rodadas[rodadaAtual].resposta;
+
+            if (escolha === respostaCorreta) {
+                pontuacao += 10;
+                document.getElementById("pontos").innerText = pontuacao;
+                feedback.innerText = "✨ Excelente! Você acertou a sequência!";
+                feedback.className = "mensagem-feedback sucesso";
+            } else {
+                feedback.innerText = `❌ Ops! A figura correta era ${respostaCorreta}`;
+                feedback.className = "mensagem-feedback erro";
+            }
+
+            setTimeout(() => {
+                rodadaAtual++;
+                if (rodadaAtual < rodadas.length) {
+                    carregarRodada();
+                } else {
+                    finalizarJogo();
+                }
+            }, 1800);
+        }
+
+        function finalizarJogo() {
+            const painel = document.getElementById("painelSequencia");
+            const containerOpcoes = document.getElementById("opcoesContainer");
+            const feedback = document.getElementById("feedback");
+
+            painel.innerHTML = `<div style="font-size: 40px; font-weight: bold; color: #005f73;">🎉 Jogo Concluído!</div>`;
+            containerOpcoes.innerHTML = "";
+            feedback.innerText = `Sua pontuação final foi de ${pontuacao} de 100 pontos!`;
+            feedback.className = "mensagem-feedback sucesso";
+        }
+
+        function reiniciarJogo() {
+            rodadaAtual = 0;
+            pontuacao = 0;
+            document.getElementById("pontos").innerText = "0";
+            carregarRodada();
+        }
+
+        function salvarResultado() {
+            const nome = document.getElementById("nomePaciente").value.trim();
+            if (!nome) {
+                alert("⚠️ Por favor, informe o nome do paciente antes de salvar!");
+                return;
+            }
+
+            const chave = "historico_" + nome.toLowerCase();
+            const historico = JSON.parse(localStorage.getItem(chave)) || [];
+
+            historico.push({
+                jogo: "Sequência Lógica Visual (10 Rodadas)",
+                sessao: historico.length + 1,
+                pontuacao: `${pontuacao} / 100 pontos`,
+                data: new Date().toLocaleDateString("pt-BR")
+            });
+
+            localStorage.setItem(chave, JSON.stringify(historico));
+            alert(`✅ Resultado do jogo salvo com sucesso no histórico de ${nome}!`);
+        }
+
+        // Inicia a primeira rodada
+        carregarRodada();
+    </script>
+
+</body>
+
+</html>

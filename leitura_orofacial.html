@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Treino de Leitura Orofacial - FonoTech</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .jogo-container {
+            max-width: 750px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(91, 33, 182, 0.08);
+            text-align: center;
+        }
+        .dica-terapeuta {
+            background-color: #ede9fe;
+            color: #5b21b6;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: left;
+        }
+        .card-visual {
+            background: #f8fafc;
+            border: 2px solid #d8b4fe;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        .emoji-grande {
+            font-size: 70px;
+            margin-bottom: 10px;
+        }
+        .instrucao-labial {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d2640;
+            margin-top: 10px;
+        }
+        .opcoes-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .btn-opcao {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 14px;
+            border: 1px solid #d8b4fe;
+            background-color: #f3e8ff;
+            color: #5b21b6;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-opcao:hover {
+            background-color: #e9d5ff;
+            transform: translateY(-2px);
+        }
+        .feedback {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .tela-inicio {
+            padding: 20px 0;
+        }
+        .input-nome {
+            width: 80%;
+            padding: 14px;
+            font-size: 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+        .btn-iniciar {
+            background-color: #5b21b6;
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-iniciar:hover {
+            background-color: #4c1d95;
+        }
+    </style>
+</head>
+<body>
+    <div style="max-width: 750px; margin: 20px auto 0 auto;" class="no-print">
+        <a href="jogos.html" style="text-decoration: none;"><button type="button" style="padding: 10px 20px; background-color: #ede9fe; color: #5b21b6; border: none; border-radius: 12px; font-weight: bold; cursor: pointer;">⬅️ Voltar à Central de Jogos</button></a>
+    </div>
+
+    <div class="jogo-container">
+        <h1 style="color: #2d2640; font-size: 26px; margin-bottom: 8px;">👁️ Treino de Leitura Orofacial</h1>
+        <p style="color: #6e6280; margin-bottom: 25px;">Registro automático de desempenho para o Prontuário do Paciente.</p>
+
+        <!-- TELA 1: IDENTIFICAÇÃO DO PACIENTE -->
+        <div id="telaInicio" class="tela-inicio">
+            <div class="dica-terapeuta">
+                💡 <strong>Instrução:</strong> Informe o nome completo do paciente abaixo para iniciar a sessão. Ao concluir as 12 rodadas, o sistema salvará automaticamente o registro e a pontuação no histórico clínico dele.
+            </div>
+            <input type="text" id="nomePacienteInput" class="input-nome" placeholder="Digite o nome completo do paciente...">
+            <br>
+            <button type="button" class="btn-iniciar" onclick="iniciarSessao()">Iniciar Sessão ➡️</button>
+        </div>
+
+        <!-- TELA 2: O JOGO EM SI (OCULTO ATÉ INICIAR) -->
+        <div id="telaJogo" style="display: none;">
+            <div id="infoSessao" style="font-size: 13px; color: #6e6280; margin-bottom: 15px; font-weight: 600;"></div>
+
+            <div id="progresso" style="font-weight: 600; color: #7c3aed; margin-bottom: 5px;">Palavra 1 de 12</div>
+
+            <div class="card-visual">
+                <div class="emoji-grande" id="emojiVisual">⚽</div>
+                <div class="instrucao-labial" id="textoLabial">Articule sem som: "BOLA" (fechamento bilabial)</div>
+            </div>
+
+            <div class="opcoes-grid" id="opcoesContainer">
+                <!-- Botões gerados via script -->
+            </div>
+
+            <div class="feedback" id="feedbackMsg"></div>
+
+            <button type="button" id="btnProximo" onclick="proximaRodada()" style="display: none; margin: 25px auto 0 auto; padding: 12px 30px; background-color: #5b21b6; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer;">Próxima Palavra ➡️</button>
+        </div>
+    </div>
+
+    <script>
+        let pacienteNome = "";
+        let sessaoContador = 1;
+
+        const listaExercicios = [
+            { emoji: "⚽", labio: "Articule sem som: <b>'BOLA'</b> (observe o fechamento dos lábios em B)", correta: "BOLA", opcoes: ["BOLA", "MALA", "PATO", "CASA"] },
+            { emoji: "☕", labio: "Articule sem som: <b>'CAFÉ'</b> (observe os dentes no lábio em F)", correta: "CAFÉ", opcoes: ["LEITE", "CAFÉ", "ÁGUA", "SUCO"] },
+            { emoji: "🏠", labio: "Articule sem som: <b>'CASA'</b> (observe a abertura arredondada)", correta: "CASA", opcoes: ["MESA", "CASA", "PORTA", "JANELA"] },
+            { emoji: "🏍️", labio: "Articule sem som: <b>'MOTO'</b> (observe os lábios unidos em M)", correta: "MOTO", opcoes: ["CARRO", "MOTO", "BICO", "RODA"] },
+            { emoji: "🐱", labio: "Articule sem som: <b>'GATO'</b> (observe o movimento dorsal da língua)", correta: "GATO", opcoes: ["PATO", "GATO", "RATO", "SAPO"] },
+            { emoji: "🍞", labio: "Articule sem som: <b>'PÃO'</b> (observe a explosão labial em P)", correta: "PÃO", opcoes: ["PÃO", "BOLO", "MEL", "OVO"] },
+            { emoji: "🍌", labio: "Articule sem som: <b>'BANANA'</b> (observe a sequência bilabial inicial)", correta: "BANANA", opcoes: ["BANANA", "MABÚ", "BATATA", "BACON"] },
+            { emoji: "🐟", labio: "Articule sem som: <b>'PEIXE'</b> (observe a projeção labial inicial)", correta: "PEIXE", opcoes: ["PEIXE", "CARNE", "OVO", "SOPA"] },
+            { emoji: "⭐", labio: "Articule sem som: <b>'LUA'</b> (observe o arredondamento final)", correta: "LUA", opcoes: ["SOL", "LUA", "CÉU", "DIA"] },
+            { emoji: "🍎", labio: "Articule sem som: <b>'MAÇÃ'</b> (observe o lábio ocluso inicial)", correta: "MAÇÃ", opcoes: ["PERA", "MAÇÃ", "UVA", "MANGA"] },
+            { emoji: "💧", labio: "Articule sem som: <b>'ÁGUA'</b> (observe a abertura oral ampla)", correta: "ÁGUA", opcoes: ["SUCO", "LEITE", "ÁGUA", "SODA"] },
+            { emoji: "🚗", labio: "Articule sem som: <b>'CARRO'</b> (observe a oclusão velar e vibrantes)", correta: "CARRO", opcoes: ["TREM", "CARRO", "BUS", "TAXI"] }
+        ];
+
+        let rodadaAtual = 0;
+        let pontuacao = 0;
+
+        function iniciarSessao() {
+            const nomeInput = document.getElementById('nomePacienteInput').value.trim();
+            if (!nomeInput) {
+                alert("Por favor, informe o nome do paciente para registrar a sessão.");
+                return;
+            }
+            pacienteNome = nomeInput;
+
+            // Calcula quantidade de sessões já realizadas com base no localStorage
+            const chaveHist = "historico_" + pacienteNome.toLowerCase();
+            const historicoExistente = JSON.parse(localStorage.getItem(chaveHist)) || [];
+            const sessoesAnteriores = historicoExistente.filter(h => h.jogo.includes("Leitura Orofacial")).length;
+            sessaoContador = sessoesAnteriores + 1;
+
+            document.getElementById('infoSessao').innerHTML = `Paciente: <strong>${pacienteNome}</strong> &bull; Sessão Nº <strong>${sessaoContador}</strong>`;
+
+            document.getElementById('telaInicio').style.display = 'none';
+            document.getElementById('telaJogo').style.display = 'block';
+            carregarRodada();
+        }
+
+        function carregarRodada() {
+            document.getElementById('feedbackMsg').innerText = "";
+            document.getElementById('btnProximo').style.display = "none";
+
+            if (rodadaAtual >= listaExercicios.length) {
+                document.getElementById('progresso').innerText = "Treino Concluído!";
+                document.getElementById('emojiVisual').innerText = "🎉";
+                document.getElementById('textoLabial').innerHTML = `Sessão Finalizada!<br>Acertos: ${pontuacao} de ${listaExercicios.length}`;
+                document.getElementById('opcoesContainer').innerHTML = '';
+
+                // SALVA AUTOMATICAMENTE NO LOCALSTORAGE DO PACIENTE
+                salvarNoHistorico();
+                return;
+            }
+
+            document.getElementById('progresso').innerText = `Palavra ${rodadaAtual + 1} de ${listaExercicios.length}`;
+            const atual = listaExercicios[rodadaAtual];
+            
+            document.getElementById('emojiVisual').innerText = atual.emoji;
+            document.getElementById('textoLabial').innerHTML = atual.labio;
+
+            const opcoesEmbaralhadas = [...atual.opcoes].sort(() => Math.random() - 0.5);
+            const container = document.getElementById('opcoesContainer');
+            container.innerHTML = '';
+
+            opcoesEmbaralhadas.forEach(opcao => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-opcao';
+                btn.innerText = opcao;
+                btn.onclick = () => verificar(opcao, atual.correta);
+                container.appendChild(btn);
+            });
+        }
+
+        function verificar(escolhida, correta) {
+            const feedback = document.getElementById('feedbackMsg');
+            const botoes = document.querySelectorAll('.btn-opcao');
+
+            botoes.forEach(b => b.disabled = true);
+
+            if (escolhida === correta) {
+                feedback.style.color = "#15803d";
+                feedback.innerText = "✔️ Muito bem! Associação correta.";
+                pontuacao++;
+            } else {
+                feedback.style.color = "#b91c1c";
+                feedback.innerText = `❌ Quase! A palavra correta era: ${correta}`;
+            }
+
+            document.getElementById('btnProximo').style.display = "block";
+        }
+
+        function proximaRodada() {
+            rodadaAtual++;
+            carregarRodada();
+        }
+
+        function salvarNoHistorico() {
+            const chaveHist = "historico_" + pacienteNome.toLowerCase();
+            const historico = JSON.parse(localStorage.getItem(chaveHist)) || [];
+
+            const d = new Date();
+            const dataFormatada = d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", {hour: '2-digit', minute:'2-digit'});
+
+            const novoRegistro = {
+                data: dataFormatada,
+                jogo: `Treino de Leitura Orofacial (Sessão ${sessaoContador})`,
+                pontuacao: `${pontuacao} / ${listaExercicios.length} acertos`
+            };
+
+            historico.push(novoRegistro);
+            localStorage.setItem(chaveHist, JSON.stringify(historico));
+
+            // Mensagem de confirmação visual para a fonoaudióloga
+            const aviso = document.createElement('div');
+            aviso.style.cssText = "margin-top: 20px; padding: 12px; background: #dcfce7; color: #15803d; border-radius: 8px; font-weight: bold;";
+            aviso.innerText = `✅ Sessão ${sessaoContador} salva automaticamente no prontuário de ${pacienteNome}!`;
+            document.querySelector('.jogo-container').appendChild(aviso);
+        }
+    </script>
+</body>
+</html>

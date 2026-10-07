@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Correção e Ordem de Frases - FonoTech</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .jogo-container {
+            max-width: 750px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(91, 33, 182, 0.08);
+            text-align: center;
+        }
+        .dica-terapeuta {
+            background-color: #ede9fe;
+            color: #5b21b6;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: left;
+        }
+        .card-visual {
+            background: #f8fafc;
+            border: 2px solid #d8b4fe;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .frase-errada {
+            font-size: 22px;
+            font-weight: 700;
+            color: #b91c1c;
+            margin-top: 10px;
+            background: #fee2e2;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px dashed #f87171;
+            letter-spacing: 0.5px;
+        }
+        .input-resposta {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            border: 2px solid #cbd5e1;
+            border-radius: 14px;
+            margin-top: 15px;
+            outline: none;
+            box-sizing: border-box;
+            text-align: center;
+            font-family: inherit;
+            color: #1e293b;
+            background: #fff;
+        }
+        .input-resposta:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+        .btn-acao {
+            margin-top: 20px;
+            padding: 14px 30px;
+            background-color: #5b21b6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-acao:hover {
+            background-color: #4c1d95;
+        }
+        .feedback {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .input-nome {
+            width: 80%;
+            padding: 14px;
+            font-size: 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+        .btn-iniciar {
+            background-color: #5b21b6;
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div style="max-width: 750px; margin: 20px auto 0 auto;" class="no-print">
+        <a href="jogos.html" style="text-decoration: none;"><button type="button" style="padding: 10px 20px; background-color: #ede9fe; color: #5b21b6; border: none; border-radius: 12px; font-weight: bold; cursor: pointer;">⬅️ Voltar à Central de Jogos</button></a>
+    </div>
+
+    <div class="jogo-container">
+        <h1 style="color: #2d2640; font-size: 26px; margin-bottom: 8px;">✏️ Correção e Ordem de Frases</h1>
+        <p style="color: #6e6280; margin-bottom: 25px;">Observe o erro ortográfico ou sintático e digite a frase corrigida.</p>
+
+        <!-- TELA DE IDENTIFICAÇÃO -->
+        <div id="telaInicio">
+            <div class="dica-terapeuta">
+                💡 <strong>Orientações:</strong> Informe o nome do paciente para registrar automaticamente a sessão e o desempenho no prontuário clínico.
+            </div>
+            <input type="text" id="nomePacienteInput" class="input-nome" placeholder="Digite o nome completo do paciente...">
+            <br>
+            <button type="button" class="btn-iniciar" onclick="iniciarSessao()">Iniciar Atividade ➡️</button>
+        </div>
+
+        <!-- TELA DO JOGO -->
+        <div id="telaJogo" style="display: none;">
+            <div id="infoSessao" style="font-size: 13px; color: #6e6280; margin-bottom: 15px; font-weight: 600;"></div>
+            <div id="progresso" style="font-weight: 600; color: #7c3aed; margin-bottom: 5px;">Frase: 1 de 12</div>
+
+            <div class="card-visual">
+                <div style="font-size: 13px; color: #64748b; font-weight: bold; text-transform: uppercase;">Frase para corrigir:</div>
+                <div class="frase-errada" id="fraseErrada">"A POTA NAUM ABIU"</div>
+
+                <input type="text" id="respostaInput" class="input-resposta" placeholder="Digite a frase corrigida aqui..." onkeypress="observarEnter(event)">
+            </div>
+
+            <button type="button" id="btnVerificar" class="btn-acao" onclick="verificarResposta()">Verificar Resposta 🔍</button>
+            <button type="button" id="btnProximo" class="btn-acao" onclick="proximaRodada()" style="display: none;">Próxima Frase ➡️</button>
+
+            <div class="feedback" id="feedbackMsg"></div>
+        </div>
+    </div>
+
+    <script>
+        let pacienteNome = "";
+        let sessaoContador = 1;
+
+        // Lista rigorosamente revisada: todas contêm erros claros de ortografia ou coesão
+        const rodadas = [
+            { errada: "A POTA NAUM ABIU", correta: "a porta não abriu" },
+            { errada: "O CATO PULA BONITO", correta: "o gato pula bonito" },
+            { errada: "EU CUMPRI UM BOLO", correta: "eu comi um bolo" },
+            { errada: "A MENINA TOMA LETE", correta: "a menina toma leite" },
+            { errada: "O CAHORRO LATE ALTO", correta: "o cachorro late alto" },
+            { errada: "FUI NA COMPRAS HOJE", correta: "fui às compras hoje" },
+            { errada: "A BOLA AZUL CAIÚ", correta: "a bola azul caiu" },
+            { errada: "O MININO JOGA BOLA", correta: "o menino joga bola" },
+            { errada: "MÃE COMPROU UMA MÃÇÃ", correta: "mamãe comprou uma maçã" },
+            { errada: "O SOL ESTAH QUENTE", correta: "o sol está quente" },
+            { errada: "EU GOSTO DE AGUA", correta: "eu gosto de água" },
+            { errada: "O CARRO ANDA RAPIDO", correta: "o carro anda rápido" }
+        ];
+
+        let rodadaAtual = 0;
+        let pontuacao = 0;
+
+        function iniciarSessao() {
+            const nomeInput = document.getElementById('nomePacienteInput').value.trim();
+            if (!nomeInput) {
+                alert("Por favor, informe o nome do paciente.");
+                return;
+            }
+            pacienteNome = nomeInput;
+
+            const chaveHist = "historico_" + pacienteNome.toLowerCase();
+            const historicoExistente = JSON.parse(localStorage.getItem(chaveHist)) || [];
+            const sessoesAnteriores = historicoExistente.filter(h => h.jogo.includes("Correção e Ordem de Frases")).length;
+            sessaoContador = sessoesAnteriores + 1;
+
+            document.getElementById('infoSessao').innerHTML = `Paciente: <strong>${pacienteNome}</strong> &bull; Sessão Nº <strong>${sessaoContador}</strong>`;
+            document.getElementById('telaInicio').style.display = 'none';
+            document.getElementById('telaJogo').style.display = 'block';
+            carregarRodada();
+        }
+
+        function carregarRodada() {
+            document.getElementById('feedbackMsg').innerText = "";
+            document.getElementById('respostaInput').value = "";
+            document.getElementById('respostaInput').disabled = false;
+            document.getElementById('btnVerificar').style.display = "inline-block";
+            document.getElementById('btnProximo').style.display = "none";
+
+            if (rodadaAtual >= rodadas.length) {
+                document.getElementById('progresso').innerText = "Atividade Concluída!";
+                document.getElementById('fraseErrada').innerText = "🎉 Fim do Treino!";
+                document.getElementById('respostaInput').style.display = "none";
+                document.getElementById('btnVerificar').style.display = "none";
+                document.getElementById('feedbackMsg').innerHTML = `<div style="font-size: 20px; color: #5b21b6; padding: 20px;">Sessão Finalizada!<br>Acertos: ${pontuacao} de ${rodadas.length}</div>`;
+                salvarNoHistorico();
+                return;
+            }
+
+            document.getElementById('progresso').innerText = `Frase: ${rodadaAtual + 1} de ${rodadas.length}`;
+            const atual = rodadas[rodadaAtual];
+            document.getElementById('fraseErrada').innerText = `"${atual.errada}"`;
+            document.getElementById('respostaInput').focus();
+        }
+
+        function observarEnter(event) {
+            if (event.key === "Enter") {
+                verificarResposta();
+            }
+        }
+
+        function verificarResposta() {
+            const respostaUsuario = document.getElementById('respostaInput').value.trim().toLowerCase();
+            if (!respostaUsuario) {
+                alert("Por favor, digite a frase corrigida antes de verificar.");
+                return;
+            }
+
+            const atual = rodadas[rodadaAtual];
+            const usuarioFormatado = respostaUsuario.replace(/\s+/g, ' ');
+            const corretaFormatada = atual.correta.toLowerCase().replace(/\s+/g, ' ');
+
+            const feedback = document.getElementById('feedbackMsg');
+            document.getElementById('respostaInput').disabled = true;
+            document.getElementById('btnVerificar').style.display = "none";
+            document.getElementById('btnProximo').style.display = "inline-block";
+
+            if (usuarioFormatado === corretaFormatada) {
+                feedback.style.color = "#15803d";
+                feedback.innerText = "✔️ Excelente! Frase digitada e corrigida perfeitamente.";
+                pontuacao++;
+            } else {
+                feedback.style.color = "#b91c1c";
+                feedback.innerHTML = `❌ Quase! O ideal seria: <strong>"${atual.correta}"</strong>`;
+            }
+        }
+
+        function proximaRodada() {
+            rodadaAtual++;
+            carregarRodada();
+        }
+
+        function salvarNoHistorico() {
+            const chaveHist = "historico_" + pacienteNome.toLowerCase();
+            const historico = JSON.parse(localStorage.getItem(chaveHist)) || [];
+            const d = new Date();
+            const dataFormatada = d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", {hour: '2-digit', minute:'2-digit'});
+
+            historico.push({
+                data: dataFormatada,
+                jogo: `Correção e Ordem de Frases (Sessão ${sessaoContador})`,
+                pontuacao: `${pontuacao} / ${rodadas.length} acertos`
+            });
+            localStorage.setItem(chaveHist, JSON.stringify(historico));
+
+            const aviso = document.createElement('div');
+            aviso.style.cssText = "margin-top: 20px; padding: 12px; background: #dcfce7; color: #15803d; border-radius: 8px; font-weight: bold;";
+            aviso.innerText = `✅ Sessão ${sessaoContador} salva automaticamente no prontuário de ${pacienteNome}!`;
+            document.querySelector('.jogo-container').appendChild(aviso);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Eco ou Não? - FonoTech</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        h1 { color: #1e293b; margin-bottom: 5px; font-size: 24px; }
+        p.sub { color: #64748b; margin-bottom: 25px; font-size: 14px; }
+        .form-identificacao { margin: 20px 0; padding: 20px; background: #f1f5f9; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .form-identificacao input { padding: 10px; font-size: 15px; width: 80%; max-width: 350px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 8px; outline: none; }
+        .btn-iniciar { background-color: #1d4ed8; color: white; border: none; padding: 10px 25px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; display: block; margin-left: auto; margin-right: auto; }
+        .jogo-area { display: none; }
+        .pares-box { font-size: 28px; font-weight: bold; margin: 25px 0; color: #1e293b; }
+        .botoes-comparacao { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
+        .btn-comp { padding: 15px 30px; font-size: 18px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; }
+        .btn-iguais { background: #16a34a; }
+        .btn-diferentes { background: #dc2626; }
+        .voltar-link { display: inline-block; margin-top: 30px; text-decoration: none; color: #64748b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👂 Eco ou Não?</h1>
+        <p class="sub">Discriminação auditiva de pares mínimos</p>
+        <div id="telaIdentificacao" class="form-identificacao">
+            <label style="font-weight: bold; display: block;">Nome do Paciente:</label>
+            <input type="text" id="nomePaciente" placeholder="Nome completo...">
+            <button type="button" class="btn-iniciar" onclick="iniciar()">Iniciar 🚀</button>
+        </div>
+        <div id="telaJogo" class="jogo-area">
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 10px;">Paciente: <strong id="exibirNome"></strong></div>
+            <div>Rodada <span id="numRodada">1</span> de 5</div>
+            <div class="pares-box" id="displayPares"></div>
+            <p>As duas palavras ouvidas são iguais ou diferentes?</p>
+            <div class="botoes-comparacao">
+                <button class="btn-comp btn-iguais" onclick="avaliar(true)">Iguais 🟢</button>
+                <button class="btn-comp btn-diferentes" onclick="avaliar(false)">Diferentes 🔴</button>
+            </div>
+            <div id="feedback" style="margin-top: 20px; font-weight: bold;"></div>
+        </div>
+        <a href="index.html" class="voltar-link">⬅️ Voltar para a Pasta de Jogos</a>
+    </div>
+    <script>
+        const lista = [
+            { p1: "Faca", p2: "Vaca", iguais: false },
+            { p1: "Pato", p2: "Pato", iguais: true },
+            { p1: "Tia", p2: "Dia", iguais: false },
+            { p1: "Sapo", p2: "Zelo", iguais: false },
+            { p1: "Bola", p2: "Bola", iguais: true }
+        ];
+        let idx = 0;
+        function iniciar() {
+            let nome = document.getElementById('nomePaciente').value;
+            if(!nome) return alert('Digite o nome');
+            document.getElementById('exibirNome').innerText = nome;
+            document.getElementById('telaIdentificacao').style.display = 'none';
+            document.getElementById('telaJogo').style.display = 'block';
+            carregar();
+        }
+        function carregar() {
+            if(idx >= lista.length) {
+                document.getElementById('telaJogo').innerHTML = "<h1>🎉 Parabéns!</h1><p>Treino de discriminação auditiva concluído.</p>";
+                return;
+            }
+            document.getElementById('numRodada').innerText = idx + 1;
+            document.getElementById('displayPares').innerText = `"${lista[idx].p1}"  e  "${lista[idx].p2}"`;
+            document.getElementById('feedback').innerText = "";
+        }
+        function avaliar(resp) {
+            if(resp === lista[idx].iguais) {
+                document.getElementById('feedback').style.color = '#16a34a';
+                document.getElementById('feedback').innerText = "✨ Correto!";
+                idx++;
+                setTimeout(carregar, 1200);
+            } else {
+                document.getElementById('feedback').style.color = '#dc2626';
+                document.getElementById('feedback').innerText = "❌ Incorreto, tente prestar mais atenção!";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Intenção Comunicativa - FonoTech</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .painel-pergunta {
+            background-color: #ffffff;
+            border: 2px solid #0a9396;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 650px;
+            margin: 20px auto;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .painel-pergunta img {
+            max-width: 220px;
+            max-height: 220px;
+            width: auto;
+            height: auto;
+            border-radius: 10px;
+            margin: 15px 0;
+            object-fit: contain;
+            border: 1px solid #ddd;
+        }
+
+        .grid-alternativas {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .btn-alternativa {
+            background-color: #ffffff;
+            border: 2px solid #0a9396;
+            color: #005f73;
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .btn-alternativa:hover {
+            background-color: #e0f2f1;
+            transform: translateX(4px);
+        }
+
+        .painel-sessao-destaque {
+            background-color: #fff3bf;
+            border: 1px solid #ffe066;
+            border-radius: 8px;
+            padding: 10px 15px;
+            display: inline-block;
+            margin-top: 10px;
+            color: #856404;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="no-print" style="display: flex; justify-content: space-between; align-items: center;">
+        <a href="jogos.html">
+            <button type="button">⬅️ Voltar aos Jogos</button>
+        </a>
+    </div>
+
+    <h1 style="text-align: center; color: #005f73;">🗣️ Jogo de Intenção Comunicativa</h1>
+    <p style="text-align: center;">Observe a imagem e responda à pergunta sobre a conduta comunicativa funcional!</p>
+
+    <!-- IDENTIFICAÇÃO DO PACIENTE E PAINEL DE SESSÕES -->
+    <div style="text-align: center; margin-bottom: 20px;" class="no-print">
+        <label for="pacienteJogo"><strong>Paciente:</strong></label>
+        <input type="text" id="pacienteJogo" placeholder="Digite o nome do paciente" style="width: 250px; display: inline-block;" oninput="verificarSessoesAnteriores()">
+        <button onclick="iniciarPartida()" style="background-color: #0a9396;">🚀 Iniciar Partida (5 Questões)</button>
+
+        <br>
+        <div id="painelInfoSessao" class="painel-sessao-destaque" style="display: none;"></div>
+    </div>
+
+    <!-- ÁREA DO JOGO -->
+    <div id="areaJogo" style="display: none;">
+
+        <div style="display: flex; justify-content: space-around; align-items: center; max-width: 650px; margin: 0 auto;">
+            <div>
+                <h3>🎯 Questão: <span id="numeroRodada" style="color: #0a9396;">1</span>/5</h3>
+            </div>
+            <div>
+                <h3>🏆 Acertos: <span id="contadorAcertos" style="color: #2a9d8f;">0</span></h3>
+            </div>
+        </div>
+
+        <!-- PAINEL DA PERGUNTA COM IMAGEM LOCAL -->
+        <div class="painel-pergunta">
+            <div id="containerImagem"></div>
+            <h2 id="textoPergunta" style="color: #005f73; font-size: 19px; margin-top: 10px;"></h2>
+        </div>
+
+        <!-- ALTERNATIVAS -->
+        <div class="grid-alternativas" id="containerAlternativas"></div>
+    </div>
+
+    <script>
+        const nomeDoJogoAtual = "Jogo de Intenção Comunicativa";
+
+        // BANCO COM AS 5 ASSERTIVAS E SUAS IMAGENS LOCAIS
+        const questoesIntencao = [
+            {
+                img: "imagem/água.jpeg",
+                pergunta: "O que a criança pode fazer para mostrar que quer água?",
+                alternativas: [
+                    { texto: "👉 Apontar para o copo ou garrafa de água", correta: true },
+                    { texto: "😴 Deitar no chão e dormir", correta: false },
+                    { texto: "🚪 Sair da sala sem falar nada", correta: false }
+                ]
+            },
+            {
+                img: "imagem/ajuda.jpeg",
+                pergunta: "Quando a criança não consegue abrir um pote ou brinquedo, o que ela deve fazer?",
+                alternativas: [
+                    { texto: "📦 Jogar o objeto longe", correta: false },
+                    { texto: "🙋‍♀️ Entregar o objeto para o adulto e pedir ajuda", correta: true },
+                    { texto: "🙈 Cruzar os braços e chorar em silêncio", correta: false }
+                ]
+            },
+            {
+                img: "imagem/brinquedo.jpeg",
+                pergunta: "Como a criança pode demonstrar interesse em brincar com o brinquedo que está perto?",
+                alternativas: [
+                    { texto: "🫣 Esconder o rosto", correta: false },
+                    { texto: "👀 Olhar para o adulto, apontar ou pegar o brinquedo", correta: true },
+                    { texto: "🚶‍♀️ Ir embora para outro cômodo", correta: false }
+                ]
+            },
+            {
+                img: "imagem/brinquedo_longe.jpeg",
+                pergunta: "O brinquedo favorito está no alto da prateleira. Qual é a intenção comunicativa adequada?",
+                alternativas: [
+                    { texto: "👉 Olhar para o alto, apontar para o brinquedo e chamar o adulto", correta: true },
+                    { texto: "🧘‍♀️ Sentar no chão e esperar sozinha", correta: false },
+                    { texto: "📱 Pegar o celular de outra pessoa", correta: false }
+                ]
+            },
+            {
+                img: "imagem/continuar.jpeg",
+                pergunta: "A brincadeira pausou ou o vento acabou. O que a criança faz para mostrar que quer continuar?",
+                alternativas: [
+                    { texto: "🔄 Entregar o recurso ao adulto ou fazer o gesto de 'mais / continuar'", correta: true },
+                    { texto: "🎒 Guardar a mochila e ir embora", correta: false },
+                    { texto: "😴 Fechar os olhos", correta: false }
+                ]
+            }
+        ];
+
+        let acertos = 0;
+        let rodadaAtual = 0;
+        const totalRodadas = 5;
+        let numeroProximaSessao = 1;
+
+        function verificarSessoesAnteriores() {
+            let nome = document.getElementById("pacienteJogo").value.trim();
+            let painel = document.getElementById("painelInfoSessao");
+
+            if (nome === "") {
+                painel.style.display = "none";
+                return;
+            }
+
+            let chave = "historico_" + nome.toLowerCase();
+            let historicoGeral = JSON.parse(localStorage.getItem(chave)) || [];
+            let historicoDoJogo = historicoGeral.filter(r => r.jogo === nomeDoJogoAtual);
+            
+            numeroProximaSessao = historicoDoJogo.length + 1;
+
+            painel.style.display = "inline-block";
+            if (historicoDoJogo.length === 0) {
+                painel.innerHTML = "📌 Primeira sessão de <strong>" + nomeDoJogoAtual + "</strong> para " + nome + "!";
+            } else {
+                painel.innerHTML = "📊 <strong>" + nome + "</strong> já realizou " + historicoDoJogo.length + " sessão(ões) de <strong>" + nomeDoJogoAtual + "</strong>. Iniciando a <strong>Sessão Nº " + numeroProximaSessao + "</strong>!";
+            }
+        }
+
+        function iniciarPartida() {
+            let nome = document.getElementById("pacienteJogo").value.trim();
+            if (nome === "") {
+                alert("Por favor, digite o nome do paciente antes de iniciar.");
+                return;
+            }
+
+            verificarSessoesAnteriores();
+
+            acertos = 0;
+            rodadaAtual = 0;
+            document.getElementById("contadorAcertos").innerText = acertos;
+            document.getElementById("areaJogo").style.display = "block";
+
+            proximaRodada();
+        }
+
+        function proximaRodada() {
+            rodadaAtual++;
+
+            if (rodadaAtual > totalRodadas) {
+                finalizarSessao();
+                return;
+            }
+
+            document.getElementById("numeroRodada").innerText = rodadaAtual;
+
+            let questaoAtual = questoesIntencao[rodadaAtual - 1];
+
+            document.getElementById("containerImagem").innerHTML = `<img src="${questaoAtual.img}" alt="Situação de Intenção Comunicativa">`;
+            document.getElementById("textoPergunta").innerText = questaoAtual.pergunta;
+
+            let containerAlternativas = document.getElementById("containerAlternativas");
+            containerAlternativas.innerHTML = "";
+
+            // Embaralha as alternativas da questão atual
+            let alternativasEmbaralhadas = [...questaoAtual.alternativas].sort(() => 0.5 - Math.random());
+
+            alternativasEmbaralhadas.forEach(alt => {
+                let btn = document.createElement("button");
+                btn.className = "btn-alternativa";
+                btn.innerText = alt.texto;
+                btn.onclick = () => verificarEscolha(alt.correta);
+                containerAlternativas.appendChild(btn);
+            });
+        }
+
+        function verificarEscolha(isCorreta) {
+            if (isCorreta) {
+                acertos++;
+                document.getElementById("contadorAcertos").innerText = acertos;
+                alert("✨ Excelente! Intenção comunicativa adequada identificada.");
+            } else {
+                alert("❌ Ops! Essa conduta não demonstra a intenção comunicativa esperada.");
+            }
+
+            proximaRodada();
+        }
+
+        function finalizarSessao() {
+            let nome = document.getElementById("pacienteJogo").value.trim();
+            let chave = "historico_" + nome.toLowerCase();
+
+            let historicoGeral = JSON.parse(localStorage.getItem(chave)) || [];
+
+            historicoGeral.push({
+                sessao: numeroProximaSessao,
+                jogo: nomeDoJogoAtual,
+                pontuacao: acertos + " de " + totalRodadas,
+                data: new Date().toLocaleDateString("pt-BR")
+            });
+
+            localStorage.setItem(chave, JSON.stringify(historicoGeral));
+
+            alert("🎉 Fim de jogo!\n\nPaciente: " + nome + "\nHabilidade: " + nomeDoJogoAtual + "\nSessão: Nº " + numeroProximaSessao + "\nPontuação Final: " + acertos + " acertos em 5 questões.");
+            
+            verificarSessoesAnteriores();
+            document.getElementById("areaJogo").style.display = "none";
+        }
+    </script>
+
+</body>
+
+</html>

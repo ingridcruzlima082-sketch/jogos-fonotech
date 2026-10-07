@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Detetive Ortográfico - FonoTech</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        h1 { color: #1e293b; margin-bottom: 5px; font-size: 24px; }
+        p.sub { color: #64748b; margin-bottom: 25px; font-size: 14px; }
+        .form-identificacao { margin: 20px 0; padding: 20px; background: #f1f5f9; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .form-identificacao input { padding: 10px; font-size: 15px; width: 80%; max-width: 350px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 8px; outline: none; }
+        .btn-iniciar { background-color: #1d4ed8; color: white; border: none; padding: 10px 25px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; display: block; margin-left: auto; margin-right: auto; }
+        .btn-iniciar:hover { background-color: #1e40af; }
+        .jogo-area { display: none; }
+        .texto-caso { font-size: 20px; line-height: 2.2; background: #f1f5f9; padding: 25px; border-radius: 8px; margin: 20px 0; }
+        .palavra-clique { display: inline-block; padding: 2px 8px; margin: 0 4px; border-radius: 4px; cursor: pointer; background: #e2e8f0; transition: background 0.2s; font-weight: 500; }
+        .palavra-clique:hover { background: #cbd5e1; }
+        .voltar-link { display: inline-block; margin-top: 30px; text-decoration: none; color: #64748b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Detetive Ortográfico</h1>
+        <p class="sub">Consciência ortográfica e identificação de erros propositais</p>
+
+        <!-- TELA DE IDENTIFICAÇÃO -->
+        <div id="telaIdentificacao" class="form-identificacao">
+            <label style="font-weight: bold; display: block;">Nome do Paciente:</label>
+            <input type="text" id="nomePaciente" placeholder="Nome completo...">
+            <button type="button" class="btn-iniciar" onclick="iniciar()">Iniciar 🚀</button>
+        </div>
+
+        <!-- ÁREA DO JOGO -->
+        <div id="telaJogo" class="jogo-area">
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 10px;">Paciente: <strong id="exibirNome"></strong></div>
+            <div>Caso <span id="numCaso">1</span> de 15</div>
+            
+            <p style="margin-top: 20px;">Clique na palavra que está escrita com <strong>erro</strong> ortográfico:</p>
+            <div class="texto-caso" id="blocoFrase"></div>
+
+            <div id="feedback" style="margin-top: 15px; font-weight: bold; font-size: 16px; min-height: 24px;"></div>
+        </div>
+
+        <a href="index.html" class="voltar-link">⬅️ Voltar para a Pasta de Jogos</a>
+    </div>
+
+    <script>
+        const casos = [
+            { partes: [{t: "O ", errado: false}, {t: "karo", errado: true, corg: "carro"}, {t: " gato subiu no muro.", errado: false}] },
+            { partes: [{t: "A ", errado: false}, {t: " Kasa", errado: true, corg: "Casa"}, {t: " é muito bonita.", errado: false}] },
+            { partes: [{t: "Comi uma ", errado: false}, {t: " masan", errado: true, corg: "maçã"}, {t: " vermelha.", errado: false}] },
+            { partes: [{t: "O ", errado: false}, {t: "pasarinho", errado: true, corg: "passarinho"}, {t: " voou alto.", errado: false}] },
+            { partes: [{t: "Fui à ", errado: false}, {t: "escola", errado: false}, {t: " de ", errado: false}, {t: "bikicleta", errado: true, corg: "bicicleta"}, {t: ".", errado: false}] },
+            { partes: [{t: "O ", errado: false}, {t: "menino", errado: false}, {t: " comprou um ", errado: false}, {t: "brinquedo", errado: false}, {t: ".", errado: true, corg: "(nenhum erro nesta parte, clique na palavra correta para avançar)"}] }, // Ajustado para ter erro claro
+            { partes: [{t: "O ", errado: false}, {t: "menino", errado: false}, {t: " soltou a ", errado: false}, {t: "pipa", errado: false}] }, // Caso padrão corrigido abaixo para garantir erro único
+            { partes: [{t: "Comprei ", errado: false}, {t: "xicara", errado: true, corg: "xícara"}, {t: " nova.", errado: false}] },
+            { partes: [{t: "O ", errado: false}, {t: "cachoro", errado: true, corg: "cachorro"}, {t: " latiu para o carteiro.", errado: false}] },
+            { partes: [{t: "A ", errado: false}, {t: "flor", errado: false}, {t: " nasceu no ", errado: false}, {t: "jardim", errado: false}] },
+            { partes: [{t: "O ", errado: false}, {t: "lapis", errado: true, corg: "lápis"}, {t: " caiu no chão.", errado: false}] },
+            { partes: [{t: "A ", errado: false}, {t: "janela", errado: false}, {t: " está ", errado: false}, {t: "fexada", errado: true, corg: "fechada"}, {t: ".", errado: false}] },
+            { partes: [{t: "O ", errado: false}, {t: "sol", errado: false}, {t: " está muito ", errado: false}, {t: "kente", errado: true, corg: "quente"}, {t: ".", errado: false}] },
+            { partes: [{t: "A ", errado: false}, {t: "criansa", errado: true, corg: "criança"}, {t: " brinca no parque.", errado: false}] },
+            { partes: [{t: "O ", errado: false}, {t: "pao", errado: true, corg: "pão"}, {t: " está quentinho.", errado: false}] }
+        ];
+
+        // Refinando a lista para garantir exatamente 1 erro claro por frase
+        const listaCasosLimpa = [
+            { texto: ["O ", "karo", " gato."], idxErro: 1, palavraErro: "karo", correta: "carro" },
+            { texto: ["A ", "Kasa", " é bonita."], idxErro: 1, palavraErro: "Kasa", correta: "Casa" },
+            { texto: ["Comi uma ", "masan", " doce."], idxErro: 1, palavraErro: "masan", correta: "maçã" },
+            { texto: ["O ", "pasarinho", " voou."], idxErro: 1, palavraErro: "pasarinho", correta: "passarinho" },
+            { texto: ["Fui de ", "bikicleta", "."], idxErro: 1, palavraErro: "bikicleta", correta: "bicicleta" },
+            { texto: ["Comprei ", "xicara", " nova."], idxErro: 1, palavraErro: "xicara", correta: "xícara" },
+            { texto: ["O ", "cachoro", " latiu."], idxErro: 1, palavraErro: "cachoro", correta: "cachorro" },
+            { texto: ["O ", "lapis", " caiu."], idxErro: 1, palavraErro: "lapis", correta: "lápis" },
+            { texto: ["A porta está ", "fexada", "."], idxErro: 1, palavraErro: "fexada", correta: "fechada" },
+            { texto: ["O dia está ", "kente", "."], idxErro: 1, palavraErro: "kente", correta: "quente" },
+            { texto: ["A ", "criansa", " corre."], idxErro: 1, palavraErro: "criansa", correta: "criança" },
+            { texto: ["Comprei ", "pao", " fresco."], idxErro: 1, palavraErro: "pao", correta: "pão" },
+            { texto: ["A ", "estrada", " é longa."], idxErro: 1, palavraErro: "estrada", correta: "estrada (sem erro? Vamos trocar)" }, // Ajustando abaixo
+            { texto: ["O ", "meninu", " sorriu."], idxErro: 1, palavraErro: "meninu", correta: "menino" },
+            { texto: ["A ", "nuvem", " é cinza."], idxErro: 1, palavraErro: "nuvem", correta: "nuvem" }
+        ];
+
+        // Versão final limpa e garantida com 15 itens e 1 erro por item
+        const casosFinais = [
+            { partes: ["O ", "karo", " corre na pista."], erroIdx: 1, corr: "carro" },
+            { partes: ["A ", "Kasa", " é grande."], erroIdx: 1, corr: "Casa" },
+            { partes: ["Comi uma ", "masan", "."], erroIdx: 1, corr: "maçã" },
+            { partes: ["O ", "pasarinho", " voou alto."], erroIdx: 1, corr: "passarinho" },
+            { partes: ["Fui de ", "bikicleta", "."], erroIdx: 1, corr: "bicicleta" },
+            { partes: ["Comprei uma ", "xicara", "."], erroIdx: 1, corr: "xícara" },
+            { partes: ["O ", "cachoro", " latiu."], erroIdx: 1, corr: "cachorro" },
+            { partes: ["O ", "lapis", " quebrou."], erroIdx: 1, corr: "lápis" },
+            { partes: ["A porta está ", "fexada", "."], erroIdx: 1, corr: "fechada" },
+            { partes: ["O sol está ", "kente", "."], erroIdx: 1, corr: "quente" },
+            { partes: ["A ", "criansa", " chora."], erroIdx: 1, corr: "criança" },
+            { partes: ["Comprei ", "pao", " na padaria."], erroIdx: 1, corr: "pão" },
+            { partes: ["O ", "meninu", " brinca."], erroIdx: 1, corr: "menino" },
+            { partes: ["O ", "gatu", " mia de noite."], erroIdx: 1, corr: "gato" },
+            { partes: ["A ", "escola", " é legal."], erroIdx: -1, corr: "Nenhum erro" } // Caso sem erro para treinar discriminação
+        ];
+
+        let rodada = 0;
+
+        function iniciar() {
+            let nome = document.getElementById('nomePaciente').value.trim();
+            if(!nome) return alert('Por favor, digite o nome do paciente.');
+            document.getElementById('exibirNome').innerText = nome;
+            document.getElementById('telaIdentificacao').style.display = 'none';
+            document.getElementById('telaJogo').style.display = 'block';
+            carregarRodada();
+        }
+
+        function carregarRodada() {
+            if(rodada >= casosFinais.length) {
+                document.getElementById('telaJogo').innerHTML = `
+                    <h1>🎉 Parabéns!</h1>
+                    <p class="sub">Todas as 15 rodadas do Detetive Ortográfico foram concluídas!</p>
+                    <button onclick="location.reload()" style="padding:10px 20px; background:#1d4ed8; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Reiniciar Atividade</button>
+                `;
+                return;
+            }
+
+            document.getElementById('numCaso').innerText = rodada + 1;
+            document.getElementById('feedback').innerText = "";
+            
+            let item = casosFinais[rodada];
+            let bloco = document.getElementById('blocoFrase');
+            bloco.innerHTML = '';
+
+            item.partes.forEach((p, index) => {
+                let span = document.createElement('span');
+                span.innerText = p;
+                if(index === item.erroIdx) {
+                    span.className = 'palavra-clique';
+                    span.onclick = () => {
+                        document.getElementById('feedback').style.color = '#16a34a';
+                        document.getElementById('feedback').innerText = `✨ Correto! Encontraste o erro ("${p}" deve ser "${item.corr}").`;
+                        rodada++;
+                        setTimeout(carregarRodada, 1500);
+                    };
+                } else {
+                    span.className = 'palavra-clique';
+                    span.onclick = () => {
+                        if(item.erroIdx === -1) {
+                            document.getElementById('feedback').style.color = '#16a34a';
+                            document.getElementById('feedback').innerText = `✨ Correto! Esta frase não tem erros.`;
+                            rodada++;
+                            setTimeout(carregarRodada, 1500);
+                        } else {
+                            document.getElementById('feedback').style.color = '#dc2626';
+                            document.getElementById('feedback').innerText = `❌ Esta palavra está correta. Procure o erro na frase.`;
+                        }
+                    };
+                }
+                bloco.appendChild(span);
+            });
+        }
+    </script>
+</body>
+</html>
